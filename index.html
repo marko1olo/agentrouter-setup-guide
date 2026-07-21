@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentRouter Ultimate Hub | Bypass WAF & Caching Guide</title>
+    <!-- Modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --card-bg: #14181f;
+            --card-border: #212836;
+            --accent-pink: #ff3377;
+            --accent-cyan: #00ffcc;
+            --text-main: #f3f4f6;
+            --text-muted: #8e9bb0;
+            --code-bg: #090b0e;
+            --shadow-glow: 0 0 20px rgba(0, 255, 204, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background glow */
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 255, 204, 0.08) 0%, rgba(255, 51, 119, 0.05) 50%, rgba(0,0,0,0) 100%);
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+            pointer-events: none;
+            filter: blur(80px);
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, rgba(255, 51, 119, 0.1) 0%, rgba(0, 255, 204, 0.1) 100%);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 70%, var(--accent-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+        }
+
+        /* Navigation Tabs */
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            max-width: 900px;
+            margin: 0 auto 40px auto;
+            background-color: var(--card-bg);
+            padding: 6px;
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            color: var(--bg-color);
+            background: linear-gradient(90deg, var(--accent-cyan) 0%, #00e5ff 100%);
+            box-shadow: var(--shadow-glow);
+            font-weight: 700;
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 1200px;
+            margin: 0 auto 100px auto;
+            padding: 0 20px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Configurator Layout */
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 30px;
+            height: 100%;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 span {
+            color: var(--accent-cyan);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            width: 100%;
+            background-color: var(--code-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
+        }
+
+        select.input-field {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238e9bb0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 18px;
+        }
+
+        /* Preview Code Block */
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--code-bg);
+            border: 1px solid var(--card-border);
+            border-bottom: none;
+            padding: 12px 20px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .preview-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .copy-btn {
+            background: none;
+            border: 1px solid var(--card-border);
+            color: var(--accent-cyan);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background-color: rgba(0, 255, 204, 0.05);
+            border-color: var(--accent-cyan);
+        }
+
+        .code-container {
+            position: relative;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        /* Informative Section */
+        .info-box {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-box h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box.danger h3 {
+            color: var(--accent-pink);
+        }
+
+        .info-box p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            margin-top: 10px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Download button styling */
+        .download-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, rgba(0, 255, 204, 0.05) 0%, rgba(255, 51, 119, 0.05) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 20px 30px;
+            margin-top: 30px;
+        }
+
+        .download-text h4 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .download-text p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--accent-cyan) 0%, #00e5ff 100%);
+            color: var(--bg-color);
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--shadow-glow);
+            transition: var(--transition);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <header>
+        <div class="badge">🔥 Новое обновление 21.07.2026</div>
+        <h1>AgentRouter Ultimate Hub</h1>
+        <p class="subtitle">Быстрый обход WAF, решение проблемы обрывов стриминга и генератор готовых конфигураций для любых сред разработки и SillyTavern.</p>
+    </header>
+
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="switchTab('configurator')">Генератор конфигов</button>
+        <button class="tab-btn" onclick="switchTab('proxy-setup')">Установка прокси</button>
+        <button class="tab-btn" onclick="switchTab('nsfw-bypass')">Обход фильтров NSFW</button>
+    </div>
+
+    <main>
+        <!-- CONFIGURATOR TAB -->
+        <section id="configurator" class="tab-content active">
+            <div class="config-grid">
+                <!-- Inputs -->
+                <div class="card">
+                    <h2><span>01.</span> Параметры</h2>
+                    
+                    <div class="input-group">
+                        <label for="api-key">Ваш API Ключ (AgentRouter)</label>
+                        <input type="text" id="api-key" class="input-field" placeholder="sk-..." value="sk-dERPWqmuaY3vbSPk3GUNusf8DEcwcVrwqIVBvmE5UD68f88b">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="proxy-port">Порт локального прокси</label>
+                        <input type="number" id="proxy-port" class="input-field" value="8318">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="target-tool">Выберите инструмент</label>
+                        <select id="target-tool" class="input-field" onchange="generateConfig()">
+                            <option value="cline">Cline / Roo Code (VS Code)</option>
+                            <option value="claude-code">Claude Code Extension (VS Code)</option>
+                            <option value="copilot">GitHub Copilot (VS Code)</option>
+                            <option value="cursor">Cursor IDE</option>
+                            <option value="claude-app">Claude Desktop App</option>
+                            <option value="cli">Claude Code CLI (Консоль)</option>
+                            <option value="sillytavern">SillyTavern (Ролевки)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="card">
+                    <div class="preview-header">
+                        <span class="preview-title" id="config-filename">settings.json</span>
+                        <button class="copy-btn" onclick="copyConfig()">Копировать</button>
+                    </div>
+                    <div class="code-container">
+                        <pre><code id="code-output"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROXY SETUP TAB -->
+        <section id="proxy-setup" class="tab-content">
+            <div class="info-box">
+                <h3>Зачем нужен локальный прокси?</h3>
+                <p>
+                    На серверах AgentRouter работает WAF (Web Application Firewall). Он сбрасывает запросы от сторонних расширений (Cline, Roo, Таверны), возвращая ошибку <code>401 Unauthorized</code> или обрывая стриминг длинного контекста с ошибкой <code>BrokenPipeError</code>. 
+                    Наш асинхронный прокси на <strong>FastAPI</strong> маскирует трафик под разрешенный клиент (<code>codex_cli_rs</code>) и устраняет любые зависания стриминга.
+                </p>
+            </div>
+
+            <div class="info-box">
+                <h3>Инструкция по запуску:</h3>
+                <ul>
+                    <li>Установите зависимости: <code>pip install fastapi uvicorn httpx</code></li>
+                    <li>Скачайте скрипт <code>agentrouter_proxy.py</code></li>
+                    <li>Запустите его командой: <code>python agentrouter_proxy.py --port 8318</code></li>
+                </ul>
+            </div>
+
+            <div class="download-banner">
+                <div class="download-text">
+                    <h4>Универсальный асинхронный прокси</h4>
+                    <p>Поддерживает одновременную работу с VS Code, Cursor и SillyTavern.</p>
+                </div>
+                <a href="https://raw.githubusercontent.com/marko1olo/agentrouter-setup-guide/main/agentrouter_proxy.py" target="_blank" class="download-btn">Скачать .py скрипт</a>
+            </div>
+        </section>
+
+        <!-- NSFW BYPASS TAB -->
+        <section id="nsfw-bypass" class="tab-content">
+            <div class="info-box">
+                <h3>Победа над ошибкой "sensitive words detected"</h3>
+                <p>
+                    Это фильтр самого AgentRouter. Он срабатывает на подозрительные слова в карточке персонажа или системном промте.
+                </p>
+                <ul>
+                    <li><strong>Замена тегов:</strong> Фильтр жестко триггерится на закрывающий XML-тег <code>&lt;/character&gt;</code>. Замените его в карточке на <code>&lt;/char&gt;</code> или <code>&lt;/ch&gt;</code>, и 90% блокировок сразу пропадут!</li>
+                    <li><strong>Удаление триггеров:</strong> Уберите из карточек и промтов явные слова типа <code>sex</code>, <code>drugs</code>, <code>violence</code>, заменив их на синонимы или описательные конструкции.</li>
+                    <li><strong>Дополнительные параметры:</strong> В параметрах подключения в Таверне обязательно переопределите параметры <code>temperature</code> или <code>top_p</code>.</li>
+                </ul>
+            </div>
+            
+            <div class="info-box danger">
+                <h3>Фильтры цензуры моделей Claude</h3>
+                <p>
+                    С взрослыми персонажами (NSFW) у Claude Opus/Sonnet на AgentRouter проблем практически нет. Однако для пробива жесткой цензуры используйте джейлбрейки (jailbreaks) и правильный контекст персонажа.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (tabId === 'configurator') {
+                generateConfig();
+            }
+        }
+
+        // Live config generation logic
+        const apiKeyInput = document.getElementById('api-key');
+        const portInput = document.getElementById('proxy-port');
+        
+        [apiKeyInput, portInput].forEach(el => el.addEventListener('input', generateConfig));
+
+        function generateConfig() {
+            const key = apiKeyInput.value.trim() || 'sk-YOUR_KEY';
+            const port = portInput.value.trim() || '8318';
+            const tool = document.getElementById('target-tool').value;
+            
+            const fileTitle = document.getElementById('config-filename');
+            const codeOutput = document.getElementById('code-output');
+
+            if (tool === 'cline') {
+                fileTitle.innerText = "VS Code settings.json (Cline/Roo)";
+                codeOutput.innerText = JSON.stringify({
+                    "apiProvider": "anthropic",
+                    "anthropicBaseUrl": `http://127.0.0.1:${port}`,
+                    "anthropicApiKey": key,
+                    "anthropicModelId": "claude-opus-4-8"
+                }, null, 4);
+            } 
+            else if (tool === 'claude-code') {
+                fileTitle.innerText = "VS Code settings.json";
+                codeOutput.innerText = JSON.stringify({
+                    "claudeCode.environmentVariables": [
+                        { "name": "ANTHROPIC_AUTH_TOKEN", "value": key },
+                        { "name": "ANTHROPIC_BASE_URL", "value": `http://127.0.0.1:${port}` },
+                        { "name": "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY", "value": "1" },
+                        { "name": "ANTHROPIC_MODEL", "value": "claude-opus-4-8" }
+                    ],
+                    "claudeCode.disableLoginPrompt": true,
+                    "claudeCode.initialPermissionMode": "bypassPermissions",
+                    "claudeCode.allowDangerouslySkipPermissions": true
+                }, null, 4);
+            }
+            else if (tool === 'copilot') {
+                fileTitle.innerText = "Copilot Custom Endpoints";
+                codeOutput.innerText = `Название: AgentRouter\nAPI Key: ${key}\nBase URL (для Claude): http://127.0.0.1:${port}\nBase URL (для GPT): http://127.0.0.1:${port}/v1\nModel ID: claude-opus-4-8 или gpt-5.5`;
+            }
+            else if (tool === 'cursor') {
+                fileTitle.innerText = "Cursor Settings (Models)";
+                codeOutput.innerText = `1. Перейдите в Settings -> Models\n2. Отключите 'Cursor Tab'\n3. Включите 'Override Base URL'\n4. Пропишите: http://127.0.0.1:${port}\n5. Вставьте свой API Ключ: ${key}`;
+            }
+            else if (tool === 'claude-app') {
+                fileTitle.innerText = "Claude App Dev Settings";
+                codeOutput.innerText = `1. Включите Dev Mode (Help -> Troubleshooting -> Enable developer mode)\n2. Введите параметры:\n   - Gateway base URL: http://127.0.0.1:${port}\n   - Gateway API key: ${key}\n   - Gateway auth scheme: bearer`;
+            }
+            else if (tool === 'cli') {
+                fileTitle.innerText = "PowerShell commands";
+                codeOutput.innerText = `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'http://127.0.0.1:${port}', 'User')\n[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', '${key}', 'User')\n[System.Environment]::SetEnvironmentVariable('ANTHROPIC_MODEL', 'claude-opus-4-8', 'User')\n\n# Фикс вечной авторизации:\nNew-Item -ItemType Directory -Force -Path "$HOME\\.claude"\nSet-Content -Path "$HOME\\.claude\\.credentials.json" -Value '{"hasCompletedOnboarding": true}'`;
+            }
+            else if (tool === 'sillytavern') {
+                fileTitle.innerText = "SillyTavern Settings";
+                codeOutput.innerText = `1. API: Выберите 'Chat Completion'\n2. API-провайдер: Выберите 'OpenAI' или 'Custom (OpenAI-compatible)'\n3. API URL: http://127.0.0.1:${port}/v1\n4. API Key: Вставьте ${key}\n5. Нажмите кнопку коннекта и выберите модель (например, gpt-5.5 или claude-opus-4-8)`;
+            }
+        }
+
+        function copyConfig() {
+            const code = document.getElementById('code-output').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerText = "Скопировано!";
+                setTimeout(() => btn.innerText = "Копировать", 2000);
+            });
+        }
+
+        // Initialize generator
+        generateConfig();
+    </script>
+</body>
+</html>
