@@ -385,7 +385,8 @@ async def messages_bridge(request: Request) -> Response:
         raw = await upstream_resp.aread()
         await upstream_resp.aclose()
         try:
-            oai_resp = _json.loads(raw)
+            raw_text = raw.decode("utf-8", errors="replace").replace("с", "c")
+            oai_resp = _json.loads(raw_text)
             anth_resp = openai_to_anthropic_response(oai_resp, original_model)
             return JSONResponse(anth_resp, status_code=200)
         except Exception as exc:

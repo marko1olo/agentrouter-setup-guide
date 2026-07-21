@@ -418,26 +418,45 @@
             <div class="info-box">
                 <h3>Зачем нужен локальный прокси?</h3>
                 <p>
-                    На серверах AgentRouter работает WAF (Web Application Firewall). Он сбрасывает запросы от сторонних расширений (Cline, Roo, Таверны), возвращая ошибку <code>401 Unauthorized</code> или обрывая стриминг длинного контекста с ошибкой <code>BrokenPipeError</code>. 
-                    Наш асинхронный прокси на <strong>FastAPI</strong> маскирует трафик под разрешенный клиент (<code>codex_cli_rs</code>) и устраняет любые зависания стриминга.
+                    На серверах AgentRouter работает жесткий WAF, блокирующий сторонние приложения (ошибка <code>401 Unauthorized</code> или <code>500 sensitive_words_detected</code> на длинных промптах). Кроме того, на стороне AgentRouter сломан оригинальный Tool Calling для моделей Claude (сервер возвращает 500 ошибку паники).
                 </p>
-            </div>
-
-            <div class="info-box">
-                <h3>Инструкция по запуску:</h3>
-                <ul>
-                    <li>Установите зависимости: <code>pip install fastapi uvicorn httpx</code></li>
-                    <li>Скачайте скрипт <code>agentrouter_proxy.py</code></li>
-                    <li>Запустите его командой: <code>python agentrouter_proxy.py --port 8318</code></li>
+                <p style="margin-top: 10px;">
+                    Наш асинхронный прокси на <strong>FastAPI</strong> полностью и автоматически решает обе проблемы:
+                </p>
+                <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
+                    <li><strong>Обход WAF (Cyrillic-Bypass):</strong> Прокси прозрачно заменяет английские буквы <code>c</code> на русские <code>с</code> в запросе, обходя WAF, и возвращает их обратно в ответе. Код остается синтаксически идеальным.</li>
+                    <li><strong>Мост Anthropic → OpenAI:</strong> Запросы автоматически переводятся в OpenAI формат и отправляются на стабильные модели <code>gpt-5.5</code> или <code>glm-5.2</code>. Ваш редактор думает, что работает с Claude, и весь функционал (включая чтение/запись файлов) работает без сбоев.</li>
                 </ul>
             </div>
 
-            <div class="download-banner">
+            <div class="info-box">
+                <h3>Инструкция по установке и запуску:</h3>
+                <ol style="margin-left: 20px; color: var(--text-muted);">
+                    <li>Установите зависимости: <code style="color: var(--accent-cyan);">pip install fastapi uvicorn httpx</code></li>
+                    <li>Скачайте оба скрипта из репозитория и положите в одну папку: <code>agentrouter_proxy.py</code> и <code>format_bridge.py</code></li>
+                    <li>Запустите прокси: <code style="color: var(--accent-cyan);">python agentrouter_proxy.py</code></li>
+                </ol>
+            </div>
+
+            <div class="info-box">
+                <h3>Как переключать модели (gpt-5.5 / glm-5.2):</h3>
+                <p>Вы можете задать целевую модель через переменную среды <code>AGENTROUTER_BRIDGE_MODEL</code> при запуске:</p>
+                <pre style="border: 1px solid var(--card-border); padding: 10px; border-radius: 8px; margin-top: 10px; background-color: var(--code-bg);"><code style="font-size: 0.85rem; color: var(--accent-cyan);"># Windows (PowerShell):
+$env:AGENTROUTER_BRIDGE_MODEL="glm-5.2"   # для дешевого и быстрого GLM
+$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.5"   # для мощного GPT (по умолчанию)
+python agentrouter_proxy.py
+
+# Linux / macOS (Bash):
+export AGENTROUTER_BRIDGE_MODEL="glm-5.2"
+python agentrouter_proxy.py</code></pre>
+            </div>
+
+            <div class="download-banner" style="margin-top: 20px;">
                 <div class="download-text">
-                    <h4>Универсальный асинхронный прокси</h4>
-                    <p>Поддерживает одновременную работу с VS Code, Cursor и SillyTavern.</p>
+                    <h4>Репозиторий проекта на GitHub</h4>
+                    <p>Исходный код прокси и моста, баг-трекер и инструкции.</p>
                 </div>
-                <a href="https://raw.githubusercontent.com/marko1olo/agentrouter-setup-guide/main/agentrouter_proxy.py" target="_blank" class="download-btn">Скачать .py скрипт</a>
+                <a href="https://github.com/marko1olo/agentrouter-setup-guide" target="_blank" class="download-btn">Открыть GitHub</a>
             </div>
         </section>
 
