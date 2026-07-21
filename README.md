@@ -65,7 +65,7 @@ mkdir -p ~/.config/systemd/user
 ```
 В файл `~/.config/systemd/user/agentrouter_proxy.service` записываем следующее:
 
-```toml
+```ini
 [Unit]
 Description=AgentRouter Proxy Service
 After=network.target
