@@ -124,3 +124,59 @@ Set-Content -Path "$HOME\.claude\.credentials.json" -Value '{"hasCompletedOnboar
 
 ## ⚠️ Предупреждение
 Этот репозиторий создан в образовательных целях. Проверяйте исходный код Python-прокси перед запуском на своем ПК. Использование API сторонних шлюзов подразумевает передачу им вашего контекста — не используйте его для обработки строго конфиденциального или NDA-кода.
+
+---
+
+## 🔀 Аддендум: Мост Anthropic → OpenAI (Claude сломан? Не проблема)
+
+> **Актуально с июля 2026:** AgentRouter периодически ронял свою Anthropic-интеграцию (Go panic `interface conversion: interface {} is nil`). Все модели `claude-*` возвращали `500`. GPT-5.5 и GLM-5.2 при этом работали нормально.
+
+Начиная с этой версии, прокси включает **автоматический мост** (`format_bridge.py`), который прозрачно переводит запросы от Claude Code / Cline в OpenAI-формат и обратно. Вы продолжаете работать в VS Code как обычно — прокси сам переключается на рабочую модель.
+
+### Как это работает
+
+```
+Claude Code (VS Code)
+    ↓  POST /v1/messages  [формат Anthropic]
+agentrouter_proxy.py  ← перехватывает
+    ↓  конвертирует в OpenAI-формат
+    ↓  POST /v1/chat/completions → AgentRouter (gpt-5.5)
+    ↓  конвертирует ответ обратно в Anthropic-формат + SSE
+Claude Code (VS Code)  ← видит родной формат, не знает разницы
+```
+
+### Установка
+
+Мост встроен в прокси. Просто скачайте оба файла рядом:
+
+```bash
+# Оба файла уже лежат в этом репо
+agentrouter_proxy.py
+format_bridge.py
+```
+
+Запуск как обычно — `python agentrouter_proxy.py`. Мост включён по умолчанию.
+
+### Управление мостом
+
+| Переменная среды | Значение по умолчанию | Описание |
+|---|---|---|
+| `AGENTROUTER_BRIDGE` | `true` | Включить/выключить мост |
+| `AGENTROUTER_BRIDGE_MODEL` | `gpt-5.5` | Целевая модель на AgentRouter |
+
+**Примеры:**
+```bash
+# Отключить мост (когда Claude снова работает):
+set AGENTROUTER_BRIDGE=false && python agentrouter_proxy.py
+
+# Переключить на GLM-5.2:
+set AGENTROUTER_BRIDGE_MODEL=glm-5.2 && python agentrouter_proxy.py
+```
+
+### Что поддерживает мост
+- ✅ Обычный текстовый диалог (стриминг и без)
+- ✅ Системные промпты
+- ✅ Tool use / Function calling
+- ✅ Мультимодальность (base64 изображения)
+- ✅ Все параметры: `temperature`, `top_p`, `stop_sequences`, `max_tokens`
+
