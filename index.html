@@ -418,14 +418,15 @@
             <div class="info-box">
                 <h3>Зачем нужен локальный прокси?</h3>
                 <p>
-                    На серверах AgentRouter работает жесткий WAF, блокирующий сторонние приложения (ошибка <code>401 Unauthorized</code> или <code>500 sensitive_words_detected</code> на длинных промптах). Кроме того, на стороне AgentRouter сломан оригинальный Tool Calling для моделей Claude (сервер возвращает 500 ошибку паники).
+                    На серверах AgentRouter работает жесткий WAF, блокирующий сторонние приложения (ошибка <code>401 Unauthorized</code> или <code>500 sensitive_words_detected</code> на длинных системных промптах). 
                 </p>
                 <p style="margin-top: 10px;">
-                    Наш асинхронный прокси на <strong>FastAPI</strong> полностью и автоматически решает обе проблемы:
+                    Наш асинхронный прокси на <strong>FastAPI</strong> полностью решает эту проблему:
                 </p>
                 <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
                     <li><strong>Обход WAF (Cyrillic-Bypass):</strong> Прокси прозрачно заменяет английские буквы <code>c</code> на русские <code>с</code> в запросе, обходя WAF, и возвращает их обратно в ответе. Код остается синтаксически идеальным.</li>
-                    <li><strong>Мост Anthropic → OpenAI:</strong> Запросы автоматически переводятся в OpenAI формат и отправляются на стабильные модели <code>gpt-5.5</code> или <code>glm-5.2</code>. Ваш редактор думает, что работает с Claude, и весь функционал (включая чтение/запись файлов) работает без сбоев.</li>
+                    <li><strong>Нативный режим (по умолчанию):</strong> Так как паника Tool Calling была исправлена разработчиками AgentRouter, прокси по умолчанию работает в прямом режиме (<code>AGENTROUTER_BRIDGE=false</code>). Вы получаете чистый Claude Opus.</li>
+                    <li><strong>Мост на OpenAI (опционально):</strong> При необходимости запросы можно автоматически переводить в OpenAI формат и отправлять на <code>gpt-5.5</code> или <code>glm-5.2</code>.</li>
                 </ul>
             </div>
 
@@ -433,21 +434,32 @@
                 <h3>Инструкция по установке и запуску:</h3>
                 <ol style="margin-left: 20px; color: var(--text-muted);">
                     <li>Установите зависимости: <code style="color: var(--accent-cyan);">pip install fastapi uvicorn httpx</code></li>
-                    <li>Скачайте оба скрипта из репозитория и положите в одну папку: <code>agentrouter_proxy.py</code> и <code>format_bridge.py</code></li>
-                    <li>Запустите прокси: <code style="color: var(--accent-cyan);">python agentrouter_proxy.py</code></li>
+                    <li>Скачайте оба скрипта из репозитория и положите в одну папку (или на Рабочий стол): <code>agentrouter_proxy.py</code> и <code>format_bridge.py</code></li>
+                    <li>Скачайте и запустите <code>run_proxy.bat</code> для удобного выбора режима запуска в 1 клик.</li>
                 </ol>
             </div>
 
             <div class="info-box">
-                <h3>Как переключать модели (gpt-5.5 / glm-5.2):</h3>
-                <p>Вы можете задать целевую модель через переменную среды <code>AGENTROUTER_BRIDGE_MODEL</code> при запуске:</p>
+                <h3>Режимы запуска (как переключать вручную):</h3>
+                <p>Вы можете переключать режимы через переменные среды при запуске:</p>
                 <pre style="border: 1px solid var(--card-border); padding: 10px; border-radius: 8px; margin-top: 10px; background-color: var(--code-bg);"><code style="font-size: 0.85rem; color: var(--accent-cyan);"># Windows (PowerShell):
-$env:AGENTROUTER_BRIDGE_MODEL="glm-5.2"   # для дешевого и быстрого GLM
-$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.5"   # для мощного GPT (по умолчанию)
+# Запуск чистого Claude Opus (по умолчанию):
+$env:AGENTROUTER_BRIDGE="false"
+python agentrouter_proxy.py
+
+# Мост на gpt-5.5 (OpenAI):
+$env:AGENTROUTER_BRIDGE="true"
+$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.5"
+python agentrouter_proxy.py
+
+# Мост на GLM-5.2 (Быстро/Дешево):
+$env:AGENTROUTER_BRIDGE="true"
+$env:AGENTROUTER_BRIDGE_MODEL="glm-5.2"
 python agentrouter_proxy.py
 
 # Linux / macOS (Bash):
-export AGENTROUTER_BRIDGE_MODEL="glm-5.2"
+# Запуск чистого Claude Opus (по умолчанию):
+export AGENTROUTER_BRIDGE="false"
 python agentrouter_proxy.py</code></pre>
             </div>
 
