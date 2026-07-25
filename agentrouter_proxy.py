@@ -289,9 +289,24 @@ async def messages_bridge(request: Request) -> Response:
         if isinstance(content, str):
             m["content"] = content.replace('c', 'с')
         elif isinstance(content, list):
+            new_content = []
             for part in content:
-                if part.get("type") == "text" and isinstance(part.get("text"), str):
+                # ВАЖНО: Удаляем блоки type="thinking" из истории, так как AWS Bedrock
+                # на стороне AgentRouter падает в ValidationException: thinking: Field required
+                if isinstance(part, dict) and part.get("type") == "thinking":
+                    continue
+                if isinstance(part, dict) and part.get("type") == "text" and isinstance(part.get("text"), str):
                     part["text"] = part["text"].replace('c', 'с')
+                new_content.append(part)
+            m["content"] = new_content
+
+    # Очищаем битые/неполные поля thinking в корневом объекте
+    if "thinking" in anth_body and isinstance(anth_body["thinking"], dict):
+        t_cfg = anth_body["thinking"]
+        if t_cfg.get("type") == "enabled" and "budget_tokens" not in t_cfg:
+            t_cfg["budget_tokens"] = 1024
+        elif not t_cfg.get("type"):
+            anth_body.pop("thinking", None)
 
     original_model = anth_body.get("model", "claude-opus-4-8")
     is_streaming = anth_body.get("stream", False)
