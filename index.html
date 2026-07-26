@@ -493,7 +493,80 @@ python agentrouter_proxy.py</code></pre>
                 </p>
             </div>
         </section>
-    </main>
+    
+        <!-- PRICING TAB -->
+        <section id="pricing" class="tab-content">
+            <div class="info-box" style="border-left: 4px solid var(--accent-purple, #a855f7);">
+                <h3>📊 Официальный расчёт стоимости AgentRouter</h3>
+                <p>Формула списания за токены на AgentRouter (Pay-as-you-go):</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: #38bdf8; margin: 10px 0;">
+                    Стоимость ($) = Группа (1x) × Модель Ratio × [Prompt tokens + (Completion tokens × Completion Ratio)] / 500,000
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>🏷️ Коэффициенты и Цены моделей AgentRouter</h3>
+                <div style="overflow-x: auto; margin-top: 10px;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; color: var(--text-main);">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--card-border); color: #38bdf8;">
+                                <th style="padding: 10px;">Модель / Ratio</th>
+                                <th style="padding: 10px;">Model Ratio</th>
+                                <th style="padding: 10px;">Completion Ratio</th>
+                                <th style="padding: 10px;">Prompt ($ / 1M)</th>
+                                <th style="padding: 10px;">Completion ($ / 1M)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--card-border);">
+                                <td style="padding: 10px;"><strong>Claude Opus (High Ratio)</strong></td>
+                                <td style="padding: 10px;">4.0x</td>
+                                <td style="padding: 10px;">5.0x</td>
+                                <td style="padding: 10px; color: #4ade80;">$8.00 / 1M</td>
+                                <td style="padding: 10px; color: #f87171;">$40.00 / 1M</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--card-border);">
+                                <td style="padding: 10px;"><strong>Claude 3.5 Sonnet / Standard</strong></td>
+                                <td style="padding: 10px;">3.5x</td>
+                                <td style="padding: 10px;">2.0x</td>
+                                <td style="padding: 10px; color: #4ade80;">$7.00 / 1M</td>
+                                <td style="padding: 10px; color: #f87171;">$14.00 / 1M</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--card-border);">
+                                <td style="padding: 10px;"><strong>GPT-5.5 / Flagship Bridge</strong></td>
+                                <td style="padding: 10px;">3.0x</td>
+                                <td style="padding: 10px;">1.5x</td>
+                                <td style="padding: 10px; color: #4ade80;">$6.00 / 1M</td>
+                                <td style="padding: 10px; color: #f87171;">$9.00 / 1M</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--card-border);">
+                                <td style="padding: 10px;"><strong>Claude 3.5 Haiku / Medium</strong></td>
+                                <td style="padding: 10px;">2.0x</td>
+                                <td style="padding: 10px;">5.0x</td>
+                                <td style="padding: 10px; color: #4ade80;">$4.00 / 1M</td>
+                                <td style="padding: 10px; color: #f87171;">$20.00 / 1M</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--card-border);">
+                                <td style="padding: 10px;"><strong>GLM-5.2 / Fast Bridge</strong></td>
+                                <td style="padding: 10px;">2.0x</td>
+                                <td style="padding: 10px;">2.0x</td>
+                                <td style="padding: 10px; color: #4ade80;">$4.00 / 1M</td>
+                                <td style="padding: 10px; color: #f87171;">$8.00 / 1M</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--card-border);">
+                                <td style="padding: 10px;"><strong>Lite / Standard Model</strong></td>
+                                <td style="padding: 10px;">2.0x</td>
+                                <td style="padding: 10px;">2.0x</td>
+                                <td style="padding: 10px; color: #4ade80;">$4.00 / 1M</td>
+                                <td style="padding: 10px; color: #f87171;">$8.00 / 1M</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+</main>
 
     <script>
         function switchTab(tabId) {
