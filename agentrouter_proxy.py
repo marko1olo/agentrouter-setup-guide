@@ -59,12 +59,12 @@ RETRYABLE_METHODS = {"GET", "HEAD", "POST"}
 # Мост Anthropic → OpenAI
 # --------------------------------------------------------------------------- #
 
-# BRIDGE_ENABLED=true:  /v1/messages переводится в /v1/chat/completions (gpt-5.5 и т.п.)
+# BRIDGE_ENABLED=true:  /v1/messages переводится в /v1/chat/completions (gpt-5.6-sol и т.п.)
 # BRIDGE_ENABLED=false: /v1/messages проксируется напрямую с WAF-байпасом
-BRIDGE_ENABLED = os.environ.get("AGENTROUTER_BRIDGE", "false").lower() in ("true", "1", "yes")
+BRIDGE_ENABLED = os.environ.get("AGENTROUTER_BRIDGE", "true").lower() in ("true", "1", "yes")
 
 # Целевая модель, которую мост будет использовать на стороне AgentRouter.
-BRIDGE_TARGET_MODEL = os.environ.get("AGENTROUTER_BRIDGE_MODEL", "gpt-5.5")
+BRIDGE_TARGET_MODEL = os.environ.get("AGENTROUTER_BRIDGE_MODEL", "gpt-5.6-sol")
 
 # Таймауты httpx.
 # ВАЖНО: read=None (без таймаута на чтение), чтобы долгие "рассуждения" модели
@@ -324,10 +324,11 @@ async def messages_bridge(request: Request) -> Response:
     original_model = anth_body.get("model", "claude-opus-4-8")
     is_streaming = anth_body.get("stream", False)
 
-    # 1. Если включен МОСТ на OpenAI (gpt-5.5 / glm-5.2)
+    # 1. Если включен МОСТ на OpenAI (gpt-5.6-sol / gpt-5.5 / glm-5.2)
     if BRIDGE_ENABLED and _BRIDGE_MODULE_OK:
-        log.info("[BRIDGE] %s -> %s (stream=%s)", original_model, BRIDGE_TARGET_MODEL, is_streaming)
-        oai_body = anthropic_to_openai(anth_body, target_model=BRIDGE_TARGET_MODEL)
+        target_model = anth_body.get("model") or BRIDGE_TARGET_MODEL
+        log.info("[BRIDGE] %s -> %s (stream=%s)", original_model, target_model, is_streaming)
+        oai_body = anthropic_to_openai(anth_body, target_model=target_model)
         oai_bytes = _json.dumps(oai_body).encode()
 
         headers = _build_upstream_headers(request)
