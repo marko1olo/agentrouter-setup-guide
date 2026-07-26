@@ -459,10 +459,25 @@ async def proxy(full_path: str, request: Request) -> Response:
     media_type = upstream_resp.headers.get("content-type")
 
     async def body_iterator():
+        decoder = codecs.getincrementaldecoder("utf-8")()
+        buffer = ""
         try:
-            async for chunk in upstream_resp.aiter_raw():
-                if chunk:
-                    yield chunk
+            async for raw_chunk in upstream_resp.aiter_bytes():
+                text = decoder.decode(raw_chunk)
+                if not text:
+                    continue
+                buffer += text
+                while "\n" in buffer:
+                    line, buffer = buffer.split("\n", 1)
+                    # Фильтруем служебный 'data: {"billing":...}' чанк от AgentRouter,
+                    # чтобы у Cherry Studio не выскакивала ошибка 'Type validation failed'
+                    if line.strip().startswith('data: {"billing":'):
+                        continue
+                    yield (line.replace("с", "c") + "\n").encode("utf-8")
+
+            remainder = decoder.decode(b"", final=True) + buffer
+            if remainder and not remainder.strip().startswith('data: {"billing":'):
+                yield remainder.replace("с", "c").encode("utf-8")
         except httpx.StreamClosed:
             log.debug("[STREAM] closed")
         except httpx.RequestError as exc:
