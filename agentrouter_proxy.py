@@ -450,24 +450,6 @@ async def proxy(full_path: str, request: Request) -> Response:
     headers = _build_upstream_headers(request)
     body = await request.body()
 
-    # WAF Bypass для OpenAI /v1/chat/completions: кодируем английские 'c' -> русские 'с'
-    if method in ("POST", "PUT", "PATCH") and body:
-        try:
-            import json as _json
-            body_json = _json.loads(body)
-            if isinstance(body_json, dict) and "messages" in body_json:
-                for msg in body_json["messages"]:
-                    content = msg.get("content")
-                    if isinstance(content, str):
-                        msg["content"] = content.replace("c", "с")
-                    elif isinstance(content, list):
-                        for part in content:
-                            if isinstance(part, dict) and isinstance(part.get("text"), str):
-                                part["text"] = part["text"].replace("c", "с")
-                body = _json.dumps(body_json).encode("utf-8")
-        except Exception:
-            pass
-
     result = await _open_upstream_stream(method, url, headers, body)
     if isinstance(result, JSONResponse):
         return result
