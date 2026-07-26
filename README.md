@@ -192,13 +192,13 @@ python agentrouter_proxy.py
 
 
 
-## 💰 Официальный список моделей AgentRouter (Все 6 моделей)
+
+## 💰 Актуальный список моделей AgentRouter (5 моделей)
 
 | ID Модели | Тип эндпоинта | Model Ratio | Completion Ratio | Вход (Prompt) | Выход (Completion) |
 |---|---|---|---|---|---|
 | `claude-opus-4-8` | Anthropic / OpenAI | 4.0x | 5.0x | **$8.00** / 1M | **$40.00** / 1M |
-| `claude-opus-4-6` | Anthropic / OpenAI | 3.5x | 2.0x | **$7.00** / 1M | **$14.00** / 1M |
-| `gpt-5.5` | OpenAI | 3.0x | 1.5x | **$6.00** / 1M | **$9.00** / 1M |
 | `gpt-5.6-sol` | OpenAI | 2.0x | 5.0x | **$4.00** / 1M | **$20.00** / 1M |
+| `gpt-5.5` | OpenAI | 3.0x | 1.5x | **$6.00** / 1M | **$9.00** / 1M |
 | `glm-5.2` | OpenAI | 2.0x | 2.0x | **$4.00** / 1M | **$8.00** / 1M |
 | `kimi-k3` | OpenAI | 2.0x | 2.0x | **$4.00** / 1M | **$8.00** / 1M |
