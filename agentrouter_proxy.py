@@ -161,6 +161,25 @@ app.add_middleware(
 )
 
 
+def _safe_waf_encode_json(obj: any) -> any:
+    """Безопасная маскировка 'c' -> 'с' ТОЛЬКО в текстах сообщений, не затрагивая ключи JSON и ID."""
+    if isinstance(obj, str):
+        return obj
+    elif isinstance(obj, dict):
+        new_dict = {}
+        for k, v in obj.items():
+            if k in ("content", "text", "prompt", "system") and isinstance(v, str):
+                new_dict[k] = v.replace('c', 'с')
+            elif isinstance(v, (dict, list)):
+                new_dict[k] = _safe_waf_encode_json(v)
+            else:
+                new_dict[k] = v
+        return new_dict
+    elif isinstance(obj, list):
+        return [_safe_waf_encode_json(item) for item in obj]
+    return obj
+
+
 def _build_upstream_headers(request: Request) -> dict[str, str]:
     """Собирает заголовки для запроса на upstream, применяя маскировку."""
     headers: dict[str, str] = {}
@@ -450,6 +469,13 @@ async def proxy(full_path: str, request: Request) -> Response:
     method = request.method
     headers = _build_upstream_headers(request)
     body = await request.body()
+    if body and "json" in request.headers.get("content-type", "").lower():
+        try:
+            body_json = _json.loads(body)
+            safe_json = _safe_waf_encode_json(body_json)
+            body = _json.dumps(safe_json).encode("utf-8")
+        except Exception:
+            pass
 
     result = await _open_upstream_stream(method, url, headers, body)
     if isinstance(result, JSONResponse):
