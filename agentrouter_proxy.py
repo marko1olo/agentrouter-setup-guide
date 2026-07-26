@@ -257,7 +257,19 @@ async def _open_upstream_stream(
             "proxy": "agentrouter_proxy",
             "attempts": max_attempts,
         },
-    )
+@app.get("/v1/models")
+async def list_models() -> dict:
+    """Возвращает список моделей для автозаполнения в GUI-клиентах (Cherry Studio и др.)."""
+    return {
+        "object": "list",
+        "data": [
+            {"id": "claude-opus-4-8", "object": "model", "owned_by": "agentrouter"},
+            {"id": "gpt-5.6-sol", "object": "model", "owned_by": "agentrouter"},
+            {"id": "gpt-5.5", "object": "model", "owned_by": "agentrouter"},
+            {"id": "glm-5.2", "object": "model", "owned_by": "agentrouter"},
+            {"id": "kimi-k3", "object": "model", "owned_by": "agentrouter"},
+        ],
+    }
 
 
 @app.post("/v1/messages")
