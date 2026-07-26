@@ -8,22 +8,22 @@ echo.
 
 powershell -Command "$p=(netstat -ano | Select-String ':8318 ' | Select-String 'LISTENING') -replace '.*LISTENING\s+', '' -replace '\s.*', ''; if($p){Stop-Process -Id $p -Force; Write-Host 'Cleared previous process on port 8318'}" >nul 2>&1
 
-echo Список актуальных моделей AgentRouter (5 моделей):
+echo Список актуальных моделей AgentRouter:
 echo.
-echo [1] Direct: claude-opus-4-8 (По умолчанию - Нативный + WAF Bypass)
-echo [2] Bridge: gpt-5.6-sol (ТОП ПО КОДИНГУ - OpenAI Мост)
-echo [3] Bridge: gpt-5.5 (OpenAI Мост)
-echo [4] Bridge: glm-5.2 (Быстрый и дешёвый OpenAI Мост)
-echo [5] Bridge: kimi-k3 (Топ Фронтенд - OpenAI Мост)
+echo [1] Direct: claude-opus-4-8 - По умолчанию - Нативный + WAF Bypass
+echo [2] Bridge: gpt-5.6-sol - ТОП ПО КОДИНГУ - OpenAI Мост
+echo [3] Bridge: gpt-5.5 - OpenAI Мост
+echo [4] Bridge: glm-5.2 - Быстрый и дешёвый OpenAI Мост
+echo [5] Bridge: kimi-k3 - Топ Фронтенд - OpenAI Мост
 echo [6] Ввести СВОЁ название модели вручную
 echo [7] Выход
 echo.
-set /p opt="Выберите опцию (1-7) [По умолчанию: 1]: "
+set /p opt="Выберите опцию 1-7 [По умолчанию: 1]: "
 
 if "%opt%"=="2" (
     set AGENTROUTER_BRIDGE=true
     set AGENTROUTER_BRIDGE_MODEL=gpt-5.6-sol
-    echo [РЕЖИМ] Мост включён: gpt-5.6-sol (ТОП КОДИРОВАНИЯ)
+    echo [РЕЖИМ] Мост включён: gpt-5.6-sol - ТОП КОДИРОВАНИЯ
 ) else if "%opt%"=="3" (
     set AGENTROUTER_BRIDGE=true
     set AGENTROUTER_BRIDGE_MODEL=gpt-5.5
@@ -45,7 +45,7 @@ if "%opt%"=="2" (
     exit
 ) else (
     set AGENTROUTER_BRIDGE=false
-    echo [РЕЖИМ] Прямой claude-opus-4-8 (Нативный + WAF Bypass)
+    echo [РЕЖИМ] Прямой claude-opus-4-8 - Нативный + WAF Bypass
 )
 
 echo.
