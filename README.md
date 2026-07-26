@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) ![VS Code](https://img.shields.io/badge/VS_Code-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white) ![Cursor](https://img.shields.io/badge/Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)
 
-Полное руководство по настройке и использованию **бесплатного API** (Claude Opus 4.8, GPT-5.5) от шлюза AgentRouter в ваших любимых ИИ-редакторах. Включает локальный Python-прокси для обхода WAF (ошибки `HTTP 401 Unauthorized` и `BrokenPipeError`).
+Полное руководство по настройке и использованию **бесплатного API** (Claude Opus 4.8, GPT-5.5, 5.6) от шлюза AgentRouter в ваших любимых ИИ-редакторах. Включает локальный Python-прокси для обхода WAF (ошибки `HTTP 401 Unauthorized` и `BrokenPipeError`).
 
 ---
 
@@ -141,7 +141,7 @@ python agentrouter_proxy.py
 - ✅ Сложные системные промпты (включая Мастер-Конспекты)
 - ✅ Вызовы инструментов (Tool Use / Function Calling) — чтение, запись и редактирование файлов в нативном и мостовом режимах
 - ✅ Мультимодальность (передача изображений)
-- ✅ Переопределение параметров `temperature`, `top_p`, `max_tokens`�рументов (Tool Calling). Попытка запустить оригинальный Claude Code / Cline напрямую приводит к системной панике на их сервере (`Panic detected, error: interface conversion: interface {} is nil`). 
+- ✅ Переопределение параметров `temperature`, `top_p`, `max_tokens`�рументов (Tool Calling). Попытка запустить оригинальный Claude Code / Cline напрямую приводит к системной панике на их сервере (`Panic detected, error: interface conversion: interface {} is nil`). 
 > 2. Кроме того, WAF AgentRouter жестко блокирует длинные промпты (особенно системные инструкции) с ошибкой `500 sensitive_words_detected`.
 
 Наш прокси решает обе проблемы полностью **в автоматическом режиме**:
