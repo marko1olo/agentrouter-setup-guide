@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 title AgentRouter WAF Bypass Proxy
 echo ==============================================
 echo       AgentRouter WAF Bypass Proxy
@@ -11,10 +12,10 @@ echo Официальный список моделей AgentRouter (все 6 м
 echo.
 echo [1] Direct claude-opus-4-8 (По умолчанию - Нативный + WAF Bypass)
 echo [2] Direct claude-opus-4-6 (Нативный + WAF Bypass)
-echo [3] Bridge -> gpt-5.5 (OpenAI Мост)
-echo [4] Bridge -> gpt-5.6-sol (OpenAI Мост)
-echo [5] Bridge -> glm-5.2 (OpenAI Мост)
-echo [6] Bridge -> kimi-k3 (OpenAI Мост)
+echo [3] Bridge -> gpt-5.6-sol (ТОП ПО КОДИНГУ - OpenAI Мост)
+echo [4] Bridge -> gpt-5.5 (OpenAI Мост)
+echo [5] Bridge -> glm-5.2 (Быстрый и дешёвый OpenAI Мост)
+echo [6] Bridge -> kimi-k3 (Топ Фронтенд - OpenAI Мост)
 echo [7] Ввести СВОЁ название модели вручную
 echo [8] Выход
 echo.
@@ -25,12 +26,12 @@ if "%opt%"=="2" (
     echo [РЕЖИМ] Прямой claude-opus-4-6 (Нативный + WAF Bypass)
 ) else if "%opt%"=="3" (
     set AGENTROUTER_BRIDGE=true
-    set AGENTROUTER_BRIDGE_MODEL=gpt-5.5
-    echo [РЕЖИМ] Мост включён -> gpt-5.5
+    set AGENTROUTER_BRIDGE_MODEL=gpt-5.6-sol
+    echo [РЕЖИМ] Мост включён -> gpt-5.6-sol (ТОП КОДИРОВАНИЯ)
 ) else if "%opt%"=="4" (
     set AGENTROUTER_BRIDGE=true
-    set AGENTROUTER_BRIDGE_MODEL=gpt-5.6-sol
-    echo [РЕЖИМ] Мост включён -> gpt-5.6-sol
+    set AGENTROUTER_BRIDGE_MODEL=gpt-5.5
+    echo [РЕЖИМ] Мост включён -> gpt-5.5
 ) else if "%opt%"=="5" (
     set AGENTROUTER_BRIDGE=true
     set AGENTROUTER_BRIDGE_MODEL=glm-5.2
