@@ -447,6 +447,7 @@ async def proxy(full_path: str, request: Request) -> Response:
         url = f"{url}?{query}"
 
     method = request.method
+    headers = _build_upstream_headers(request)
     body = await request.body()
 
     # WAF Bypass для OpenAI /v1/chat/completions: кодируем английские 'c' -> русские 'с'
