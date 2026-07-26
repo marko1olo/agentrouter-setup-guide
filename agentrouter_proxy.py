@@ -254,9 +254,10 @@ async def _open_upstream_stream(
         content={
             "message": last_error_msg,
             "status": last_error_status,
-            "proxy": "agentrouter_proxy",
-            "attempts": max_attempts,
         },
+    )
+
+
 @app.get("/v1/models")
 async def list_models() -> dict:
     """Возвращает список моделей для автозаполнения в GUI-клиентах (Cherry Studio и др.)."""
