@@ -120,6 +120,11 @@ def _translate_message(msg: dict) -> dict | list[dict] | None:
                 continue
             text_parts.append({"type": "image_url", "image_url": {"url": url}})
 
+        elif btype in ("thinking", "redacted_thinking"):
+            thinking_text = block.get("thinking", "")
+            if thinking_text:
+                text_parts.append({"type": "text", "text": f"[Thinking: {thinking_text}]"})
+
         elif btype == "tool_use":
             tool_use_parts.append({
                 "id": block.get("id", f"call_{uuid.uuid4().hex[:8]}"),

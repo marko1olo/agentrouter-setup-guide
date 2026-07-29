@@ -75,7 +75,7 @@ RETRYABLE_METHODS = {"GET", "HEAD", "POST"}
 # Модели, которые прокси отдаёт в /v1/models для автозаполнения в GUI-клиентах.
 # Актуальный список AgentRouter на 29 июля 2026: claude-opus-5 (самая дешёвая),
 # claude-opus-4-8, gpt-5.6-sol. Переопределяется через AGENTROUTER_MODELS.
-DEFAULT_MODELS = ("claude-opus-5", "claude-opus-4-8", "gpt-5.6-sol")
+DEFAULT_MODELS = ("gpt-5.6-sol", "claude-opus-4-8", "claude-opus-5")
 ADVERTISED_MODELS = tuple(
     m.strip()
     for m in os.environ.get("AGENTROUTER_MODELS", ",".join(DEFAULT_MODELS)).split(",")

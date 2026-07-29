@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi) ![VS Code](https://img.shields.io/badge/VS_Code-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white) ![Cursor](https://img.shields.io/badge/Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)
 
-Полное руководство по настройке и использованию **бесплатного API** (Claude Opus 4.8, GPT-5.5, 5.6) от шлюза AgentRouter в ваших любимых ИИ-редакторах. Включает локальный Python-прокси для обхода WAF (ошибки `HTTP 401 Unauthorized` и `BrokenPipeError`).
+Полное руководство по настройке и использованию **бесплатного API** (Claude Opus 4.8, GPT-5.6-sol, 5.6) от шлюза AgentRouter в ваших любимых ИИ-редакторах. Включает локальный Python-прокси для обхода WAF (ошибки `HTTP 401 Unauthorized` и `BrokenPipeError`).
 
 ---
 
@@ -134,8 +134,8 @@ systemctl --user enable --now agentrouter_proxy.service
 4. **API Key:** Ваш ключ `sk-...`
 5. **Формат:** 
    - Для Claude Opus выбирайте `Messages`
-   - Для GPT-5.5 выбирайте `Chat Completions`
-6. **Model ID:** `claude-opus-4-8` или `gpt-5.5`
+   - Для GPT-5.6-sol выбирайте `Chat Completions`
+6. **Model ID:** `claude-opus-4-8` или `gpt-5.6-sol`
 7. **Base URL:** `http://127.0.0.1:8318` (для ## 🔀 Аддендум: Прямой Claude Opus & Мост Anthropic → OpenAI & Обход WAF
 
 ### 4. OpenCode
@@ -172,9 +172,9 @@ systemctl --user enable --now agentrouter_proxy.service
 - При отправке запроса на AgentRouter все английские буквы `c` в тексте промпта заменяются на визуально идентичную русскую `с`. Это ломает сигнатуры WAF, и запросы гарантированно проходят с кодом `200 OK`.
 - При получении ответа от модели все русские `с` заменяются обратно на английские `c`. В итоге Claude Code получает синтаксически идеальный английский код без повреждения символов.
 
-### 🌉 2. Мост на OpenAI (gpt-5.5 / glm-5.2)
+### 🌉 2. Мост на OpenAI (gpt-5.6-sol / glm-5.2)
 Если вам по какой-то причине нужно перевести трафик на OpenAI-совместимые модели, вы можете активировать мост (перевод Anthropic `/v1/messages` -> OpenAI `/v1/chat/completions`):
-- Модель **`gpt-5.5`** (мощная модель, отлично понимает системные промпты и вызовы инструментов).
+- Модель **`gpt-5.6-sol`** (мощная модель, отлично понимает системные промпты и вызовы инструментов).
 - Модель **`glm-5.2`** (отличается высокой скоростью и низкой стоимостью).
 
 #### Как управлять режимами
@@ -188,9 +188,9 @@ systemctl --user enable --now agentrouter_proxy.service
 $env:AGENTROUTER_BRIDGE="false"
 python agentrouter_proxy.py
 
-# Мост на gpt-5.5:
+# Мост на gpt-5.6-sol:
 $env:AGENTROUTER_BRIDGE="true"
-$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.5"
+$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.6-sol"
 python agentrouter_proxy.py
 
 # Мост на GLM-5.2:
@@ -221,9 +221,9 @@ python agentrouter_proxy.py
 - При отправке запроса на AgentRouter все английские буквы `c` в тексте промпта заменяются на визуально идентичную русскую `с`. Это ломает сигнатуры WAF, и запросы гарантированно проходят с кодом `200 OK`.
 - При получении ответа от модели все русские `с` заменяются обратно на английские `c`. В итоге Claude Code получает синтаксически идеальный английский код без повреждения символов.
 
-### 🌉 2. Мост Anthropic → OpenAI (gpt-5.5 / glm-5.2)
+### 🌉 2. Мост Anthropic → OpenAI (gpt-5.6-sol / glm-5.2)
 Поскольку оригинальный Claude с инструментами падает в панику на стороне AgentRouter, прокси по умолчанию переводит все вызовы Anthropic `/v1/messages` в OpenAI-совместимый формат:
-- По умолчанию запросы направляются на **`gpt-5.5`** (мощную модель, отлично понимающую системные промпты и вызовы инструментов).
+- По умолчанию запросы направляются на **`gpt-5.6-sol`** (мощную модель, отлично понимающую системные промпты и вызовы инструментов).
 - Вы также можете использовать модель **`glm-5.2`** (отличается высокой скоростью и низкой стоимостью).
 
 #### Как переключать модели
@@ -235,8 +235,8 @@ python agentrouter_proxy.py
 $env:AGENTROUTER_BRIDGE_MODEL="glm-5.2"
 python agentrouter_proxy.py
 
-# Вернуть gpt-5.5 (по умолчанию):
-$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.5"
+# Вернуть gpt-5.6-sol (по умолчанию):
+$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.6-sol"
 python agentrouter_proxy.py
 ```
 
@@ -267,6 +267,6 @@ python agentrouter_proxy.py
 |---|---|---|---|---|---|
 | `claude-opus-4-8` | Anthropic / OpenAI | 4.0x | 5.0x | **$8.00** / 1M | **$40.00** / 1M |
 | `gpt-5.6-sol` | OpenAI | 2.0x | 5.0x | **$4.00** / 1M | **$20.00** / 1M |
-| `gpt-5.5` | OpenAI | 3.0x | 1.5x | **$6.00** / 1M | **$9.00** / 1M |
+| `gpt-5.6-sol` | OpenAI | 3.0x | 1.5x | **$6.00** / 1M | **$9.00** / 1M |
 | `glm-5.2` | OpenAI | 2.0x | 2.0x | **$4.00** / 1M | **$8.00** / 1M |
 | `kimi-k3` | OpenAI | 2.0x | 2.0x | **$4.00** / 1M | **$8.00** / 1M |
