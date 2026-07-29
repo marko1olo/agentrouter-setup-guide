@@ -4,22 +4,45 @@ format_bridge.py – Anthropic ↔ OpenAI format translator.
 Converts Anthropic /v1/messages requests to OpenAI /v1/chat/completions and
 translates responses back, including full streaming SSE translation.
 
-This module is intentionally standalone (no proxy imports) so it can be
-tested independently.
+This module is intentionally standalone: no network I/O, no imports from the
+proxy, and no knowledge of the WAF bypass. Text post-processing (undoing the
+Cyrillic homoglyph swap) is injected by the caller via `decoder_factory`, so
+this file stays unit-testable on its own.
 """
 
 from __future__ import annotations
 
 import json
 import uuid
-from typing import Generator
+from typing import Callable, Generator, Protocol
+
+
+class TextDecoder(Protocol):
+    """Stateful text filter applied to streamed fragments (see WafStreamDecoder)."""
+
+    def feed(self, text: str) -> str: ...
+
+    def flush(self) -> str: ...
+
+
+DecoderFactory = Callable[[], TextDecoder]
+
+
+class _NullDecoder:
+    """Pass-through decoder used when the caller injects nothing."""
+
+    def feed(self, text: str) -> str:
+        return text
+
+    def flush(self) -> str:
+        return ""
 
 
 # ---------------------------------------------------------------------------
 # Request: Anthropic → OpenAI
 # ---------------------------------------------------------------------------
 
-def anthropic_to_openai(body: dict, target_model: str = "gpt-5.5") -> dict:
+def anthropic_to_openai(body: dict, target_model: str = "gpt-5.6-sol") -> dict:
     """Convert an Anthropic /v1/messages body to OpenAI /v1/chat/completions format."""
     messages: list[dict] = []
 
@@ -63,15 +86,6 @@ def anthropic_to_openai(body: dict, target_model: str = "gpt-5.5") -> dict:
 
     if "tool_choice" in body:
         result["tool_choice"] = _translate_tool_choice(body["tool_choice"])
-
-    # --- WAF Bypass (Encode 'c' to Cyrillic 'с') ---
-    for m in result.get("messages", []):
-        if isinstance(m.get("content"), str):
-            m["content"] = m["content"].replace('c', 'с')
-        elif isinstance(m.get("content"), list):
-            for part in m["content"]:
-                if part.get("type") == "text" and isinstance(part.get("text"), str):
-                    part["text"] = part["text"].replace('c', 'с')
 
     return result
 
@@ -117,19 +131,18 @@ def _translate_message(msg: dict) -> dict | list[dict] | None:
             })
 
         elif btype == "tool_result":
-            tr_content = block.get("content", "")
-            if isinstance(tr_content, list):
-                tr_content = "\n".join(
-                    b.get("text", "") for b in tr_content if b.get("type") == "text"
-                )
             tool_result_parts.append({
                 "role": "tool",
                 "tool_call_id": block.get("tool_use_id", ""),
-                "content": tr_content,
+                "content": _flatten_tool_result(block.get("content", "")),
             })
 
     if tool_result_parts:
-        return tool_result_parts
+        # A single Anthropic user turn can carry tool results *and* new text
+        # (Claude Code does this on every follow-up). The text must survive as
+        # its own message, otherwise the user's actual instruction is dropped.
+        trailing = _pack_parts(role, text_parts)
+        return tool_result_parts + ([trailing] if trailing else [])
 
     if tool_use_parts and role == "assistant":
         text_content = " ".join(
@@ -137,13 +150,29 @@ def _translate_message(msg: dict) -> dict | list[dict] | None:
         ) or None
         return {"role": "assistant", "content": text_content, "tool_calls": tool_use_parts}
 
+    return _pack_parts(role, text_parts)
+
+
+def _pack_parts(role: str, text_parts: list[dict]) -> dict | None:
+    """Collapse translated content parts into one OpenAI message (or None)."""
     if not text_parts:
         return None
-
     if len(text_parts) == 1 and text_parts[0].get("type") == "text":
         return {"role": role, "content": text_parts[0]["text"]}
-
     return {"role": role, "content": text_parts}
+
+
+def _flatten_tool_result(tr_content: object) -> str:
+    """Anthropic allows a tool_result body to be a string or a block list."""
+    if isinstance(tr_content, list):
+        return "\n".join(
+            b.get("text", "")
+            for b in tr_content
+            if isinstance(b, dict) and b.get("type") == "text"
+        )
+    if isinstance(tr_content, str):
+        return tr_content
+    return json.dumps(tr_content, ensure_ascii=False)
 
 
 def _translate_tool_def(tool: dict) -> dict:
@@ -174,7 +203,11 @@ def _translate_tool_choice(tc: dict | str) -> str | dict:
 # Response: OpenAI → Anthropic (non-streaming)
 # ---------------------------------------------------------------------------
 
-def openai_to_anthropic_response(oai: dict, original_model: str) -> dict:
+def openai_to_anthropic_response(
+    oai: dict,
+    original_model: str,
+    decoder_factory: DecoderFactory | None = None,
+) -> dict:
     choice = (oai.get("choices") or [{}])[0]
     message = choice.get("message", {})
     finish_reason = choice.get("finish_reason") or "stop"
@@ -184,7 +217,7 @@ def openai_to_anthropic_response(oai: dict, original_model: str) -> dict:
         "id": oai.get("id", f"msg_{uuid.uuid4().hex[:24]}"),
         "type": "message",
         "role": "assistant",
-        "content": _extract_content_blocks(message),
+        "content": _extract_content_blocks(message, decoder_factory),
         "model": original_model,
         "stop_reason": _map_finish_reason(finish_reason),
         "stop_sequence": None,
@@ -200,17 +233,32 @@ def _map_finish_reason(reason: str) -> str:
         "stop": "end_turn",
         "length": "max_tokens",
         "tool_calls": "tool_use",
+        "function_call": "tool_use",
         "content_filter": "stop_sequence",
     }.get(reason, "end_turn")
 
 
-def _extract_content_blocks(message: dict) -> list[dict]:
+def _decode_once(text: str, decoder_factory: DecoderFactory | None) -> str:
+    if not decoder_factory or not text:
+        return text
+    decoder = decoder_factory()
+    return decoder.feed(text) + decoder.flush()
+
+
+def _extract_content_blocks(
+    message: dict,
+    decoder_factory: DecoderFactory | None = None,
+) -> list[dict]:
     blocks: list[dict] = []
     if message.get("content"):
-        blocks.append({"type": "text", "text": message["content"]})
+        blocks.append({
+            "type": "text",
+            "text": _decode_once(message["content"], decoder_factory),
+        })
     for tc in message.get("tool_calls") or []:
+        raw_args = tc.get("function", {}).get("arguments", "{}")
         try:
-            args = json.loads(tc.get("function", {}).get("arguments", "{}"))
+            args = json.loads(_decode_once(raw_args, decoder_factory))
         except (json.JSONDecodeError, TypeError):
             args = {}
         blocks.append({
@@ -235,24 +283,40 @@ class StreamingBridge:
     Stateful translator: OpenAI SSE byte stream → Anthropic SSE byte stream.
 
     Usage:
-        bridge = StreamingBridge("claude-opus-4-8")
+        bridge = StreamingBridge("claude-opus-5")
         async for chunk in upstream_response.aiter_bytes():
             for event_bytes in bridge.feed(chunk):
                 yield event_bytes
         for event_bytes in bridge.finalize():
             yield event_bytes
+
+    `decoder_factory` builds one independent text filter per content block, so
+    a chunk-split character in the text stream cannot leak into a tool-call
+    argument stream.
     """
 
-    def __init__(self, original_model: str = "claude-opus-4-8") -> None:
+    def __init__(
+        self,
+        original_model: str = "claude-opus-5",
+        decoder_factory: DecoderFactory | None = None,
+    ) -> None:
         self.original_model = original_model
+        self._decoder_factory = decoder_factory or _NullDecoder
         self._buf = b""
         self._msg_id = f"msg_{uuid.uuid4().hex[:24]}"
         self._started = False
-        self._text_block_open = False
-        self._tool_calls: dict[int, dict] = {}   # oai index → {id, name, args}
+        self._next_index = 0
+        self._text_index: int | None = None
+        self._text_decoder: TextDecoder | None = None
+        self._tool_calls: dict[int, dict] = {}   # oai index → {id, name, index, decoder}
         self._input_tokens = 0
         self._output_tokens = 0
         self._finish_reason: str | None = None
+
+    def _alloc_index(self) -> int:
+        idx = self._next_index
+        self._next_index += 1
+        return idx
 
     def feed(self, chunk: bytes) -> Generator[bytes, None, None]:
         self._buf += chunk
@@ -267,18 +331,19 @@ class StreamingBridge:
                     yield from self._handle_data(line[5:].strip())
 
     def _handle_data(self, payload: str) -> Generator[bytes, None, None]:
-        payload = payload.replace('с', 'c')  # WAF Decode
         if payload == "[DONE]":
             return
         try:
             chunk = json.loads(payload)
         except json.JSONDecodeError:
             return
+        if not isinstance(chunk, dict):
+            return
 
         # Emit message_start once
         if not self._started:
             self._started = True
-            usage = chunk.get("usage", {})
+            usage = chunk.get("usage") or {}
             self._input_tokens = usage.get("prompt_tokens", 0)
             yield _sse("message_start", {
                 "type": "message_start",
@@ -298,45 +363,53 @@ class StreamingBridge:
         choices = chunk.get("choices") or []
         if not choices:
             # Usage-only chunk (some providers send this at the end)
-            u = chunk.get("usage", {})
+            u = chunk.get("usage") or {}
             if u:
                 self._input_tokens = u.get("prompt_tokens", self._input_tokens)
                 self._output_tokens = u.get("completion_tokens", self._output_tokens)
             return
 
         choice = choices[0]
-        delta = choice.get("delta", {})
+        delta = choice.get("delta") or {}
         finish_reason = choice.get("finish_reason")
 
         # --- Text delta ---
         text = delta.get("content")
         if text:
-            if not self._text_block_open:
-                self._text_block_open = True
+            if self._text_index is None:
+                self._text_index = self._alloc_index()
+                self._text_decoder = self._decoder_factory()
                 yield _sse("content_block_start", {
                     "type": "content_block_start",
-                    "index": 0,
+                    "index": self._text_index,
                     "content_block": {"type": "text", "text": ""},
                 })
             self._output_tokens += 1
-            yield _sse("content_block_delta", {
-                "type": "content_block_delta",
-                "index": 0,
-                "delta": {"type": "text_delta", "text": text},
-            })
+            assert self._text_decoder is not None
+            decoded = self._text_decoder.feed(text)
+            if decoded:
+                yield _sse("content_block_delta", {
+                    "type": "content_block_delta",
+                    "index": self._text_index,
+                    "delta": {"type": "text_delta", "text": decoded},
+                })
 
         # --- Tool call deltas ---
         for tc_delta in delta.get("tool_calls") or []:
             oai_idx = tc_delta.get("index", 0)
-            anth_idx = oai_idx + 1  # index 0 is reserved for text block
 
             if oai_idx not in self._tool_calls:
-                tc_id = tc_delta.get("id", f"toolu_{uuid.uuid4().hex[:24]}")
+                tc_id = tc_delta.get("id") or f"toolu_{uuid.uuid4().hex[:24]}"
                 tc_name = (tc_delta.get("function") or {}).get("name", "")
-                self._tool_calls[oai_idx] = {"id": tc_id, "name": tc_name, "args": ""}
+                self._tool_calls[oai_idx] = {
+                    "id": tc_id,
+                    "name": tc_name,
+                    "index": self._alloc_index(),
+                    "decoder": self._decoder_factory(),
+                }
                 yield _sse("content_block_start", {
                     "type": "content_block_start",
-                    "index": anth_idx,
+                    "index": self._tool_calls[oai_idx]["index"],
                     "content_block": {
                         "type": "tool_use",
                         "id": tc_id,
@@ -345,19 +418,21 @@ class StreamingBridge:
                     },
                 })
 
+            state = self._tool_calls[oai_idx]
             fn = tc_delta.get("function") or {}
             if fn.get("name"):
-                self._tool_calls[oai_idx]["name"] = fn["name"]
+                state["name"] = fn["name"]
             if fn.get("arguments"):
-                self._tool_calls[oai_idx]["args"] += fn["arguments"]
-                yield _sse("content_block_delta", {
-                    "type": "content_block_delta",
-                    "index": anth_idx,
-                    "delta": {"type": "input_json_delta", "partial_json": fn["arguments"]},
-                })
+                decoded = state["decoder"].feed(fn["arguments"])
+                if decoded:
+                    yield _sse("content_block_delta", {
+                        "type": "content_block_delta",
+                        "index": state["index"],
+                        "delta": {"type": "input_json_delta", "partial_json": decoded},
+                    })
 
         # Accumulate usage
-        u = chunk.get("usage", {})
+        u = chunk.get("usage") or {}
         if u:
             self._input_tokens = u.get("prompt_tokens", self._input_tokens)
             self._output_tokens = u.get("completion_tokens", self._output_tokens)
@@ -382,13 +457,31 @@ class StreamingBridge:
                 },
             })
 
-        if self._text_block_open:
-            yield _sse("content_block_stop", {"type": "content_block_stop", "index": 0})
-
-        for oai_idx in self._tool_calls:
+        if self._text_index is not None:
+            # Flush whatever the decoder held back for right-hand context.
+            tail = self._text_decoder.flush() if self._text_decoder else ""
+            if tail:
+                yield _sse("content_block_delta", {
+                    "type": "content_block_delta",
+                    "index": self._text_index,
+                    "delta": {"type": "text_delta", "text": tail},
+                })
             yield _sse("content_block_stop", {
                 "type": "content_block_stop",
-                "index": oai_idx + 1,
+                "index": self._text_index,
+            })
+
+        for state in sorted(self._tool_calls.values(), key=lambda s: s["index"]):
+            tail = state["decoder"].flush()
+            if tail:
+                yield _sse("content_block_delta", {
+                    "type": "content_block_delta",
+                    "index": state["index"],
+                    "delta": {"type": "input_json_delta", "partial_json": tail},
+                })
+            yield _sse("content_block_stop", {
+                "type": "content_block_stop",
+                "index": state["index"],
             })
 
         stop_reason = _map_finish_reason(self._finish_reason or "stop")
