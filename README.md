@@ -45,6 +45,12 @@ AgentRouter временно раздает огромные стартовые 
 pip install fastapi uvicorn httpx
 ```
 
+В Linux лучше использовать пакеты из репозиториев вместо pip.
+
+Например для Ubuntu/Debian: 
+
+`sudo apt install python3-fastapi python3-uvicorn python3-https`
+
 ### Шаг 2. Запуск
 1. Сохраните скрипт `agentrouter_proxy.py` (находится в этом репозитории) на свой компьютер.
 2. Запустите его в консоли:
@@ -53,9 +59,47 @@ python agentrouter_proxy.py
 ```
 3. Прокси запустится по адресу: `http://127.0.0.1:8318`. **Держите консоль открытой**, пока пользуетесь ИИ.
 
+### Опционально (Linux): systemd-сервис для постоянной работы в фоне
+
+```bash
+# Создаём директорию с пользовательскими сервисами
+mkdir -p ~/.config/systemd/user
+```
+В файл `~/.config/systemd/user/agentrouter_proxy.service` записываем следующее:
+
+```ini
+[Unit]
+Description=AgentRouter Proxy Service
+After=network.target
+
+[Service]
+Type=simple
+# Путь к директории со скриптом
+WorkingDirectory=/home/user/agentrouter-setup-guide
+
+# Расположение python можно узнать при помощи which python
+ExecStart=/usr/bin/python agentrouter_proxy.py
+
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+
+```
+Далее перезугражаем сервисы и запускаем наш только что созданный:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now agentrouter_proxy.service
+```
+
 ---
 
-## 🔌 Интеграции с редакторами
+## 🔌 Интеграции с редакторами и агентами
 
 Во всех настройках ниже мы пускаем трафик через наш локальный прокси.
 
@@ -93,6 +137,30 @@ python agentrouter_proxy.py
    - Для GPT-5.5 выбирайте `Chat Completions`
 6. **Model ID:** `claude-opus-4-8` или `gpt-5.5`
 7. **Base URL:** `http://127.0.0.1:8318` (для ## 🔀 Аддендум: Прямой Claude Opus & Мост Anthropic → OpenAI & Обход WAF
+
+### 4. OpenCode
+В конфигурационный файл `~/.config/opencode/opencode.jsonc` добавить следующее в блок `providers`:
+```json
+    "agentrouter": {
+      "npm": "@ai-sdk/anthropic",
+      "name": "agentrouter",
+      "options": {
+        "baseURL": "http://127.0.0.1:8318/v1",
+        "apiKey": "sk-***" // Ваш ключ
+      },
+      "models": {
+        "claude-opus-4-6": {
+          "name": "Claude Opus 4.6",
+        },
+        "claude-opus-4-7": {
+          "name": "Claude Opus 4.7",
+        },
+        "claude-opus-4-8": {
+          "name": "Claude Opus 4.8",
+        },
+      }
+    }
+```
 
 > **Актуально на 21 июля 2026:**
 > 1. **ОПУС ПОЧИНИЛИ!** Разработчики AgentRouter устранили панику `interface conversion: interface {} is nil` при работе с инструментами (Tool Calling). Теперь оригинальные модели `claude-opus-*` работают стабильно напрямую.
