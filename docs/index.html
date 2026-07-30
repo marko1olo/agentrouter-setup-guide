@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentRouter Setup Guide & WAF Bypass Proxy</title>
+
+    <!-- Open Graph / Twitter Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://barsukdana.github.io/agentrouter-setup-guide/">
+    <meta property="og:title" content="AgentRouter Setup Guide & WAF Bypass Proxy">
+    <meta property="og:description" content="High-Performance FastAPI WAF Bypass Proxy & Anthropic-OpenAI Protocol Bridge for Claude Code CLI, Cursor, VS Code, Cline & Roo Code.">
+    <meta property="og:image" content="https://barsukdana.github.io/agentrouter-setup-guide/assets/og-preview.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AgentRouter Setup Guide & WAF Bypass Proxy">
+    <meta name="twitter:description" content="High-Performance FastAPI WAF Bypass Proxy & Anthropic-OpenAI Protocol Bridge for Claude Code CLI, Cursor, VS Code, Cline & Roo Code.">
+    <meta name="twitter:image" content="https://barsukdana.github.io/agentrouter-setup-guide/assets/og-preview.png">
+
+    <style>
+        :root {
+            --bg-main: #0a0e17;
+            --bg-card: #111827;
+            --accent-teal: #00d2b9;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: rgba(0, 210, 185, 0.2);
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: system-ui, sans-serif;
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #0a0e17 100%);
+            border-bottom: 2px solid var(--accent-teal);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .badge-live { border-color: var(--accent-teal); color: var(--accent-teal); }
+
+        .container {
+            max-width: 1140px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .hero-banner {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .hero-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            color: var(--accent-teal);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--accent-teal);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn:hover { background: #00b39e; }
+
+        pre {
+            background: #030712;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            color: #38bdf8;
+            font-family: monospace;
+            font-size: 0.88rem;
+        }
+
+        .interactive-box {
+            background: #030712;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-top: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 75px;
+            background: #111827;
+            color: #fff;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: left;
+        }
+
+        th { color: var(--accent-teal); }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🚀 AgentRouter WAF Bypass Proxy & Guide</h1>
+        <p>FastAPI ASGI Proxy & Anthropic-OpenAI Bridge for Claude Code CLI, Cursor, and VS Code</p>
+        <div class="badge-row">
+            <a href="https://barsukdana.github.io/agentrouter-setup-guide/" class="badge badge-live">● Live Demo</a>
+            <span class="badge">Python 3.10+</span>
+            <span class="badge">FastAPI ASGI</span>
+            <span class="badge">Cyrillic-Bypass WAF</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 16:9 Media Preview -->
+        <div class="hero-banner">
+            <img src="../assets/og-preview.png" alt="AgentRouter WAF Proxy Preview">
+        </div>
+
+        <div class="grid">
+            <!-- WAF Cyrillic Bypass Simulator -->
+            <div class="card">
+                <div class="card-title">🛡️ WAF Cyrillic-Bypass Simulator</div>
+                <p>Simulates bidirectional character substitution (`c` &harr; `с`) preventing WAF `500 sensitive_words_detected` and `401` blockages.</p>
+                <div class="interactive-box">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Input Request Payload:</label>
+                    <textarea id="prompt-input">Create a Python function to parse JSON config and stream output to Claude Code CLI.</textarea>
+                    <button class="btn" id="simulate-waf-btn" style="margin-top: 10px; width: 100%;">⚡ Apply WAF Cyrillic Bypass</button>
+                    <div id="waf-output" style="margin-top: 12px; font-family: monospace; font-size: 0.85rem; color: var(--accent-teal); word-break: break-all;"></div>
+                </div>
+            </div>
+
+            <!-- Bridge Mode Toggle Inspector -->
+            <div class="card">
+                <div class="card-title">🔌 Protocol Bridge Inspector (Anthropic &harr; OpenAI)</div>
+                <p>Translates Anthropic <code>/v1/messages</code> payloads into OpenAI <code>ChatCompletions</code> when targeting <code>gpt-5.6-sol</code> or <code>glm-5.2</code>.</p>
+                <div class="interactive-box">
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">Select Target Model Protocol:</label>
+                    <select id="protocol-select" style="width: 100%; padding: 8px; margin-top: 5px; background: #111827; color: white; border: 1px solid #374151; border-radius: 4px;">
+                        <option value="claude">claude-opus-4-8 (Direct Anthropic Proxy)</option>
+                        <option value="gpt">gpt-5.6-sol (OpenAI Protocol Bridge Enabled)</option>
+                        <option value="glm">glm-5.2 (OpenAI Chat Completions)</option>
+                    </select>
+                    <div id="protocol-output" style="margin-top: 12px; font-family: monospace; font-size: 0.85rem; color: var(--accent-orange);">
+                        Mode: DIRECT_PASSTHROUGH<br>User-Agent: codex_cli_rs<br>Endpoint: /v1/messages
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Pricing Matrix -->
+            <div class="card">
+                <div class="card-title">💰 AgentRouter Model Catalog</div>
+                <p>Supported models and completion ratios through local daemon proxy <code>http://127.0.0.1:8318</code>.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model ID</th>
+                            <th>Protocol</th>
+                            <th>Prompt</th>
+                            <th>Completion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>claude-opus-4-8</code></td>
+                            <td>Anthropic</td>
+                            <td>$8.00 / 1M</td>
+                            <td>$40.00 / 1M</td>
+                        </tr>
+                        <tr>
+                            <td><code>gpt-5.6-sol</code></td>
+                            <td>OpenAI Bridge</td>
+                            <td>$4.00 / 1M</td>
+                            <td>$20.00 / 1M</td>
+                        </tr>
+                        <tr>
+                            <td><code>glm-5.2</code></td>
+                            <td>OpenAI Bridge</td>
+                            <td>$4.00 / 1M</td>
+                            <td>$8.00 / 1M</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Technical Code Architecture -->
+        <div class="card">
+            <div class="card-title">⚙️ Core FastAPI Daemon Logic (agentrouter_proxy.py)</div>
+            <pre><code># agentrouter_proxy.py core WAF bypass & header spoofing daemon
+from fastapi import FastAPI, Request
+import httpx
+
+app = FastAPI()
+
+def apply_cyrillic_bypass(text: str) -> str:
+    # Bi-directional substitution to bypass static WAF regex signatures
+    return text.replace('c', 'с')
+
+@app.post("/v1/messages")
+async def handle_messages(request: Request):
+    raw_body = await request.json()
+    headers = {"User-Agent": "codex_cli_rs", "Authorization": request.headers.get("authorization")}
+    
+    # Forward payload to remote AgentRouter gateway with streaming
+    async with httpx.AsyncClient() as client:
+        res = await client.post("https://agentrouter.org/v1/messages", json=raw_body, headers=headers)
+        return res.json()</code></pre>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 AgentRouter Setup Guide — MIT Licensed.</p>
+    </footer>
+
+    <script>
+        document.getElementById('simulate-waf-btn').addEventListener('click', () => {
+            const input = document.getElementById('prompt-input').value;
+            const bypassed = input.replace(/c/g, 'с');
+            const matchCount = (input.match(/c/g) || []).length;
+            document.getElementById('waf-output').innerHTML = 
+                `<strong>Bypass Applied:</strong> ${matchCount} 'c' characters replaced with Cyrillic 'с'.<br><br>` +
+                `<em>Transformed Payload:</em> "${bypassed}"`;
+        });
+
+        document.getElementById('protocol-select').addEventListener('change', (e) => {
+            const val = e.target.value;
+            const out = document.getElementById('protocol-output');
+            if (val === 'claude') {
+                out.innerHTML = `Mode: DIRECT_PASSTHROUGH<br>User-Agent: codex_cli_rs<br>Endpoint: /v1/messages<br>Bridge: FALSE`;
+                out.style.color = "var(--accent-orange)";
+            } else if (val === 'gpt') {
+                out.innerHTML = `Mode: ANTHROPIC_TO_OPENAI_BRIDGE<br>User-Agent: codex_cli_rs<br>Endpoint: /v1/chat/completions<br>Bridge Model: gpt-5.6-sol`;
+                out.style.color = "var(--accent-teal)";
+            } else {
+                out.innerHTML = `Mode: ANTHROPIC_TO_OPENAI_BRIDGE<br>User-Agent: codex_cli_rs<br>Endpoint: /v1/chat/completions<br>Bridge Model: glm-5.2`;
+                out.style.color = "var(--accent-purple)";
+            }
+        });
+    </script>
+</body>
+</html>

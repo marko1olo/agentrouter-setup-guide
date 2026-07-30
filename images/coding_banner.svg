@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675">
+  <defs>
+    <!-- Dark Background Gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B0F19" />
+      <stop offset="50%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#030712" />
+    </linearGradient>
+
+    <!-- Glowing Accent Gradients -->
+    <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="50%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <linearGradient id="greenTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#14B8A6" />
+    </linearGradient>
+
+    <linearGradient id="orangePink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#EC4899" />
+    </linearGradient>
+
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1F2937" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#111827" stop-opacity="0.9" />
+    </linearGradient>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#374151" stroke-width="1" stroke-opacity="0.25" />
+    </pattern>
+
+    <!-- Drop Shadows & Glow Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="15" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Base Background -->
+  <rect width="1200" height="675" fill="url(#bgGradient)" />
+  <rect width="1200" height="675" fill="url(#grid)" />
+
+  <!-- Background Decorative Glowing Spheres -->
+  <circle cx="150" cy="120" r="180" fill="#6366F1" opacity="0.15" filter="url(#glow)" />
+  <circle cx="1050" cy="550" r="220" fill="#06B6D4" opacity="0.12" filter="url(#glow)" />
+  <circle cx="900" cy="150" r="140" fill="#A855F7" opacity="0.1" filter="url(#glow)" />
+
+  <!-- Top Accent Border Bar -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#cyanPurple)" />
+
+  <!-- Main Container Card / UI Window -->
+  <g filter="url(#shadow)">
+    <!-- Terminal Header Bar -->
+    <rect x="100" y="75" width="1000" height="525" rx="16" fill="url(#cardBg)" stroke="#374151" stroke-width="1.5" />
+    <rect x="100" y="75" width="1000" height="45" rx="16" fill="#111827" stroke="#374151" stroke-width="1" />
+    
+    <!-- Window Control Buttons -->
+    <circle cx="130" cy="97" r="6" fill="#EF4444" />
+    <circle cx="150" cy="97" r="6" fill="#F59E0B" />
+    <circle cx="170" cy="97" r="6" fill="#10B981" />
+
+    <!-- Terminal Window Title -->
+    <text x="600" y="102" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#9CA3AF" letter-spacing="1">agentrouter-setup-guide — bash — 1200×675</text>
+  </g>
+
+  <!-- Hero Content Section inside Card -->
+  <!-- Main Title -->
+  <text x="600" y="200" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="42" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">
+    AgentRouter Setup Guide &amp; WAF Bypass Proxy
+  </text>
+
+  <!-- Gradient Subtitle / Tagline -->
+  <text x="600" y="245" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" fill="url(#cyanPurple)">
+    High-Performance FastAPI WAF Bypass Proxy &amp; Protocol Bridge
+  </text>
+
+  <!-- Feature Badges Row -->
+  <g transform="translate(240, 275)">
+    <!-- Badge 1: FastAPI Proxy -->
+    <g transform="translate(0, 0)">
+      <rect width="210" height="40" rx="8" fill="#009688" fill-opacity="0.2" stroke="#009688" stroke-width="1.5" />
+      <circle cx="24" cy="20" r="8" fill="#009688" />
+      <text x="42" y="25" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#5EEAD4">FastAPI 0.100+</text>
+    </g>
+    <!-- Badge 2: WAF Bypass -->
+    <g transform="translate(230, 0)">
+      <rect width="240" height="40" rx="8" fill="#F59E0B" fill-opacity="0.2" stroke="#F59E0B" stroke-width="1.5" />
+      <circle cx="24" cy="20" r="8" fill="#F59E0B" />
+      <text x="42" y="25" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#FDE68A">WAF Bypass &amp; Retry</text>
+    </g>
+    <!-- Badge 3: Protocol Bridge -->
+    <g transform="translate(490, 0)">
+      <rect width="230" height="40" rx="8" fill="#6366F1" fill-opacity="0.2" stroke="#6366F1" stroke-width="1.5" />
+      <circle cx="24" cy="20" r="8" fill="#6366F1" />
+      <text x="42" y="25" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#C7D2FE">Anthropic ↔ OpenAI</text>
+    </g>
+  </g>
+
+  <!-- Code Graphic / Architecture Diagram Area -->
+  <g transform="translate(140, 345)">
+    <!-- Left Box: Client IDEs -->
+    <rect x="0" y="0" width="260" height="210" rx="12" fill="#111827" stroke="#4B5563" stroke-width="1.5" />
+    <text x="130" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#E5E7EB">Client Integrations</text>
+    <line x1="20" y1="45" x2="240" y2="45" stroke="#374151" stroke-width="1" />
+    
+    <g font-family="monospace" font-size="13" fill="#D1D5DB">
+      <text x="30" y="80"><tspan fill="#38BDF8">❯</tspan> Claude Code CLI</text>
+      <text x="30" y="115"><tspan fill="#A855F7">❯</tspan> Cursor IDE</text>
+      <text x="30" y="150"><tspan fill="#60A5FA">❯</tspan> VS Code / Cline / Roo</text>
+      <text x="30" y="185"><tspan fill="#34D399">❯</tspan> Custom Agents</text>
+    </g>
+
+    <!-- Connection Arrow 1 -->
+    <path d="M 270 105 L 340 105" stroke="#6366F1" stroke-width="3" stroke-dasharray="6,4" />
+    <polygon points="345,105 335,99 335,111" fill="#6366F1" />
+
+    <!-- Center Box: AgentRouter WAF Proxy -->
+    <rect x="350" y="0" width="260" height="210" rx="12" fill="#1E1B4B" stroke="#6366F1" stroke-width="2" filter="url(#shadow)" />
+    <text x="480" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#818CF8">FastAPI WAF Proxy</text>
+    <line x1="370" y1="45" x2="590" y2="45" stroke="#4338CA" stroke-width="1" />
+
+    <g font-family="monospace" font-size="12" fill="#E0E7FF">
+      <text x="370" y="75"><tspan fill="#10B981">✓</tspan> Port 8000 Proxy</text>
+      <text x="370" y="105"><tspan fill="#F59E0B">⚡</tspan> Sensitive Word Filter</text>
+      <text x="370" y="135"><tspan fill="#38BDF8">⇄</tspan> Header Rewriting</text>
+      <text x="370" y="165"><tspan fill="#EC4899">↺</tspan> Auto Retry &amp; Backoff</text>
+      <text x="370" y="192" font-size="11" fill="#A5B4FC">http://127.0.0.1:8000</text>
+    </g>
+
+    <!-- Connection Arrow 2 -->
+    <path d="M 620 105 L 690 105" stroke="#10B981" stroke-width="3" stroke-dasharray="6,4" />
+    <polygon points="695,105 685,99 685,111" fill="#10B981" />
+
+    <!-- Right Box: Upstream LLM Services -->
+    <rect x="700" y="0" width="220" height="210" rx="12" fill="#111827" stroke="#4B5563" stroke-width="1.5" />
+    <text x="810" y="32" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#E5E7EB">Upstream LLM API</text>
+    <line x1="720" y1="45" x2="900" y2="45" stroke="#374151" stroke-width="1" />
+
+    <g font-family="monospace" font-size="13" fill="#D1D5DB">
+      <text x="720" y="80"><tspan fill="#F43F5E">✦</tspan> Claude Opus 4.8</text>
+      <text x="720" y="115"><tspan fill="#10B981">✦</tspan> GPT-5.6-sol</text>
+      <text x="720" y="150"><tspan fill="#F59E0B">✦</tspan> GLM-5.2</text>
+      <text x="720" y="185"><tspan fill="#38BDF8">✦</tspan> AgentRouter WAF</text>
+    </g>
+  </g>
+
+  <!-- Footer Branding -->
+  <text x="600" y="635" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#6B7280">
+    Designed for Developers &amp; AI Agents • 100% Vector SVG Banner Graphic (16:9 • 1200×675)
+  </text>
+</svg>
