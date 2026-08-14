@@ -1068,7 +1068,28 @@ if ('serviceWorker' in navigator) {
         </table>
       </div>
     </section>
-  </main>
+  
+    <!-- LIVE HTTP REVERSE PROXY & WAF HEADER INSPECTOR -->
+    <section class="router-inspector-deck" style="margin: 2rem 0; background: #090d16; border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 12px; padding: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.6); font-family: 'JetBrains Mono', monospace;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+        <div>
+          <span style="background: rgba(99, 102, 241, 0.15); border: 1px solid #6366f1; color: #818cf8; font-size: 0.75rem; font-weight: bold; padding: 0.2rem 0.6rem; border-radius: 999px;">TLS 1.3 INTERCEPTOR</span>
+          <h3 style="font-size: 1.25rem; color: #fff; margin-top: 0.4rem;">Live Proxy Header & WAF Sanitization Trace</h3>
+        </div>
+        <span style="color: #22c55e; font-size: 0.8rem;">● LOOPBACK 127.0.0.1:8318</span>
+      </div>
+
+      <div style="background: #04060a; border: 1px solid #1a2333; border-radius: 8px; padding: 1rem; font-size: 0.8rem; color: #cbd5e1; line-height: 1.5; overflow-x: auto;">
+        <div style="color: #6366f1; font-weight: bold; margin-bottom: 0.4rem;">POST /v1/chat/completions HTTP/1.1</div>
+        <div style="color: #94a3b8;">Host: 127.0.0.1:8318</div>
+        <div style="color: #94a3b8;">Authorization: Bearer sk-ant-api03-*** [SANITIZED]</div>
+        <div style="color: #38bdf8;">X-AgentRouter-Cipher: Homoglyph-Bypass-v2 (Entropy: 0.88)</div>
+        <div style="color: #22c55e;">X-AgentRouter-Target: api.anthropic.com/v1/messages (Direct Pipeline)</div>
+        <div style="color: #a855f7;">TLS-Negotiated: TLS_AES_256_GCM_SHA384 (RTT: 18.4ms)</div>
+      </div>
+    </section>
+
+</main>
 
   <!-- Footer -->
   
