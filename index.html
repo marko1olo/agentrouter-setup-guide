@@ -1076,7 +1076,60 @@ if ('serviceWorker' in navigator) {
     <!-- ==========================================================================
          DUAL ARCHITECTS & CONNECTED SYNDICATE ECOSYSTEM (ADOLF PETUSHKOV & JIRNYAK)
          ========================================================================== -->
-    <section id="creator-ecosystem" style="margin: 4rem auto 3rem; max-width: 1200px; padding: 2.5rem 1.5rem; background: rgba(10, 16, 28, 0.82); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 16px; backdrop-filter: blur(14px); box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+    
+<div id="proxy-ping-tester" style="margin: 1.5rem 0; padding: 1.25rem; background: rgba(9, 14, 26, 0.9); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 12px; display: flex; flex-direction: column; gap: 0.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-family: monospace; font-size: 0.8rem; color: #00e5ff; font-weight: bold; letter-spacing: 1px;">⚡ LOCAL PROXY HEALTH &amp; LATENCY CHECKER</span>
+        <span id="pingStatusBadge" style="font-family: monospace; font-size: 0.75rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px;">READY</span>
+    </div>
+    
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <input type="text" id="proxyTestUrl" value="http://127.0.0.1:8318/v1/models" style="flex: 1; min-width: 240px; background: rgba(0,0,0,0.5); border: 1px solid rgba(0,229,255,0.3); color: #fff; padding: 0.5rem 0.8rem; border-radius: 6px; font-family: monospace; font-size: 0.82rem;">
+        <button type="button" onclick="testLocalProxyPing()" style="background: linear-gradient(135deg, #00e5ff, #3b82f6); border: none; color: #000; font-weight: bold; padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.82rem;">
+            🔍 Check Handshake
+        </button>
+    </div>
+    
+    <div id="pingConsoleLog" style="background: #040811; border: 1px solid rgba(255,255,255,0.06); padding: 0.6rem 0.8rem; border-radius: 6px; font-family: monospace; font-size: 0.75rem; color: #64748b; min-height: 38px; display: flex; align-items: center;">
+        Click "Check Handshake" to verify local proxy endpoint connectivity.
+    </div>
+</div>
+
+<script id="ar-ping-script">
+async function testLocalProxyPing() {
+    const url = document.getElementById('proxyTestUrl').value;
+    const badge = document.getElementById('pingStatusBadge');
+    const log = document.getElementById('pingConsoleLog');
+    
+    badge.innerText = 'PROBING...';
+    badge.style.color = '#38bdf8';
+    badge.style.background = 'rgba(56,189,248,0.15)';
+    log.innerHTML = `<span style="color:#38bdf8;">[INIT] Probing endpoint ${url}...</span>`;
+    
+    const start = performance.now();
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
+        
+        await fetch(url, { method: 'GET', mode: 'no-cors', signal: controller.signal });
+        clearTimeout(timeoutId);
+        const lat = Math.round(performance.now() - start);
+        
+        badge.innerText = `REACHABLE (${lat}ms)`;
+        badge.style.color = '#10b981';
+        badge.style.background = 'rgba(16,185,129,0.15)';
+        log.innerHTML = `<span style="color:#10b981;">[OK] Local proxy responded in ${lat}ms. Socket is open and accepting traffic.</span>`;
+    } catch(err) {
+        const lat = Math.round(performance.now() - start);
+        badge.innerText = 'STANDBY (PORT IDLE)';
+        badge.style.color = '#f59e0b';
+        badge.style.background = 'rgba(245,158,11,0.15)';
+        log.innerHTML = `<span style="color:#f59e0b;">[INFO] Port idle (${lat}ms). Launch proxy via 'run_proxy.bat' or systemd service to activate upstream bridge.</span>`;
+    }
+}
+</script>
+
+<section id="creator-ecosystem" style="margin: 4rem auto 3rem; max-width: 1200px; padding: 2.5rem 1.5rem; background: rgba(10, 16, 28, 0.82); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 16px; backdrop-filter: blur(14px); box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
         
         <!-- Syndicate Header & Dual Profiles -->
         <div style="padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.08);">
@@ -1602,6 +1655,64 @@ window.addEventListener('keydown', (e) => {
         const m = document.getElementById('eco-palette-modal');
         if (m) m.style.display = 'none';
     }
+});
+</script>
+
+
+<script id="eco-audio-theme-script">
+// Universal Web Audio UI Synthesizer (0 external assets, zero latency)
+let uiAudioCtx = null;
+let soundEnabled = true;
+
+function playUiSound(type = 'click') {
+    if (!soundEnabled) return;
+    try {
+        if (!uiAudioCtx) {
+            uiAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (uiAudioCtx.state === 'suspended') {
+            uiAudioCtx.resume();
+        }
+        const osc = uiAudioCtx.createOscillator();
+        const gain = uiAudioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(uiAudioCtx.destination);
+        
+        const now = uiAudioCtx.currentTime;
+        if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+            osc.start(now);
+            osc.stop(now + 0.04);
+        } else if (type === 'hover') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.linearRampToValueAtTime(440, now + 0.03);
+            gain.gain.setValueAtTime(0.02, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+            osc.start(now);
+            osc.stop(now + 0.03);
+        } else if (type === 'open') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(900, now + 0.08);
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        }
+    } catch(e) {}
+}
+
+// Add UI hover sounds to interactive elements
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('button, a, .card, .btn, input[type="range"]').forEach(el => {
+        el.addEventListener('mouseenter', () => playUiSound('hover'), { passive: true });
+        el.addEventListener('click', () => playUiSound('click'), { passive: true });
+    });
 });
 </script>
 
