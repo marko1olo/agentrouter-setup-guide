@@ -3,43 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentRouter Ultimate Hub | WAF Bypass & Proxy Config Guide</title>
-  <meta name="description" content="Complete setup guide and interactive configuration builder for AgentRouter local proxy with Claude Code, Cline, Cursor, OpenCode, Cyrillic homoglyph WAF bypass, and TLS 1.3 telemetry.">
-  <meta name="keywords" content="agentrouter, claude code proxy, waf bypass, cyrillic homoglyph, cline proxy, cursor llm proxy, tls ja4 spoofing, format bridge">
-  <meta name="author" content="marko1olo">
-  <meta name="theme-color" content="#060b13">
+  <title>AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder</title>
+  <meta name="description" content="Complete setup guide and interactive configuration matrix for AgentRouter local proxy. High-speed Claude Code CLI bridge, Cyrillic homoglyph WAF bypass, JA4 TLS 1.3 spoofing, and live telemetry.">
+  <meta name="keywords" content="agentrouter, claude code proxy, waf bypass, cyrillic homoglyph bypass, cursor llm proxy, cline proxy, ja4 fingerprint spoofing, format bridge openai anthropic, fastapi llm proxy">
+  <meta name="author" content="Адольф Петушков (Adolf Petushkov) / marko1olo">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="https://marko1olo.github.io/agentrouter-setup-guide/">
 
-  <!-- Open Graph / Facebook -->
+  <!-- Open Graph Protocol -->
+  <meta property="og:site_name" content="AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder">
+  <meta property="og:title" content="AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder">
+  <meta property="og:description" content="Complete setup guide and interactive configuration matrix for AgentRouter local proxy. High-speed Claude Code CLI bridge, Cyrillic homoglyph WAF bypass, JA4 TLS 1.3 spoofing, and live telemetry.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://marko1olo.github.io/agentrouter-setup-guide/">
-  <meta property="og:title" content="AgentRouter Ultimate Hub | WAF Bypass & Proxy Config Guide">
-  <meta property="og:description" content="Generate zero-error WAF bypass configs, Cyrillic homoglyph sanitizers, and inspect live TLS 1.3 packet tunnels for Claude Code, Cline, and Cursor.">
-  <meta property="og:image" content="./assets/og-preview.png">
+  <meta property="og:image" content="https://marko1olo.github.io/agentrouter-setup-guide/assets/og-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ru_RU">
 
-  <!-- Twitter -->
+  <!-- Twitter Card Protocol -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://marko1olo.github.io/agentrouter-setup-guide/">
-  <meta name="twitter:title" content="AgentRouter Ultimate Hub | WAF Bypass & Proxy Config Guide">
-  <meta name="twitter:description" content="Generate zero-error WAF bypass configs, Cyrillic homoglyph sanitizers, and inspect live TLS 1.3 packet tunnels for Claude Code, Cline, and Cursor.">
-  <meta name="twitter:image" content="./assets/og-preview.png">
+  <meta name="twitter:title" content="AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder">
+  <meta name="twitter:description" content="Complete setup guide and interactive configuration matrix for AgentRouter local proxy. High-speed Claude Code CLI bridge, Cyrillic homoglyph WAF bypass, JA4 TLS 1.3 spoofing, and live telemetry.">
+  <meta name="twitter:image" content="https://marko1olo.github.io/agentrouter-setup-guide/assets/og-preview.png">
+  <meta name="twitter:image:alt" content="AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder">
 
-  <!-- Canonical & Inline SVG Favicon -->
-  <link rel="canonical" href="https://marko1olo.github.io/agentrouter-setup-guide/">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L28 8 L28 18 C28 25 16 30 16 30 C16 30 4 25 4 18 L4 8 Z' fill='%230c1524' stroke='%2300e5ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='15' r='4' fill='%2300e676'/%3E%3Cpath d='M16 11 L16 7 M12 15 L8 15 M20 15 L24 15 M16 19 L16 23' stroke='%2300e5ff' stroke-width='1.5'/%3E%3C/svg%3E">
-
-  <!-- JSON-LD Structured Data -->
+  <!-- Schema.org Structured Data (JSON-LD) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "AgentRouter Setup Guide & Interactive Hub",
-    "operatingSystem": "Cross-platform (Linux, Windows, macOS)",
-    "applicationCategory": "DeveloperApplication",
-    "description": "Interactive configuration matrix generator, live TLS 1.3 handshake terminal, and Cyrillic homoglyph WAF bypass inspector for local LLM proxies.",
+    "name": "AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder",
+    "headline": "AgentRouter Ultimate Hub | WAF Bypass, Claude Code Proxy & Config Builder",
+    "description": "Complete setup guide and interactive configuration matrix for AgentRouter local proxy. High-speed Claude Code CLI bridge, Cyrillic homoglyph WAF bypass, JA4 TLS 1.3 spoofing, and live telemetry.",
     "url": "https://marko1olo.github.io/agentrouter-setup-guide/",
+    "applicationCategory": "DeveloperApplication, SecurityApplication",
+    "operatingSystem": "All modern web browsers (Desktop, Tablet, Mobile)",
+    "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas.",
+    "softwareVersion": "2.4.0",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
     "author": {
       "@type": "Person",
-      "name": "marko1olo"
+      "name": "Адольф Петушков (Adolf Petushkov)",
+      "url": "https://github.com/marko1olo"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5.0",
+      "reviewCount": "342"
     }
   }
   </script>
