@@ -274,6 +274,60 @@ python agentrouter_proxy.py
 
 ---
 
+
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/marko1olo/gigahrush/main/docs/agentrouter_waf.jpg" width="100%" alt="AgentRouter Gateway Firewall Proxy & Claude CLI Routing Hub"/>
+
+</div>
+
+---
+
+## 🛡️ WAF Bypass Architecture, Homoglyph Sanitization & TLS Proxy
+
+AgentRouter intercepts local Claude Code CLI outbound traffic, rewriting authorization headers, normalizing zero-width Unicode characters that trigger Cloudflare WAF false-positives, and dynamically selecting the optimal upstream AI gateway:
+
+```mermaid
+graph TD
+    A[Claude Code CLI / IDE Client] -->|HTTP / HTTPS 127.0.0.1:8080| B[Local AgentRouter Reverse Proxy]
+    B --> C[Unicode Homoglyph & Zero-Width Sanitizer]
+    C --> D[Header Stripper & API Key Rotation Pool]
+    D --> E[Upstream WAF Evasion & TLS Fingerprint Spoofing]
+    E --> F[Anthropic API / OpenRouter / DeepSeek Upstream]
+    F -->|Raw SSE Token Stream| G[Dechunking Byte Validator]
+    G -->|Zero-Latency Stream Pipe| A
+```
+
+### ⚡ 1. Unicode Homoglyph & Zero-Width Character Sanitizer (TypeScript)
+
+Strips zero-width spaces (`​`), invisible format controls, and normalizes Cyrillic lookalikes (`а` $	o$ `a`) before payload transmission:
+
+```typescript
+// Production WAF Evasion & Homoglyph Normalizer
+export function sanitizePromptPayload(rawPayload: string): string {
+    // 1. Strip zero-width & non-printable Unicode characters
+    let clean = rawPayload.replace(/[​-‍﻿­⁠᠎]/g, '');
+
+    // 2. Unicode NFKC normalization (canonical decomposition + compatibility composition)
+    clean = clean.normalize('NFKC');
+
+    // 3. Prevent header injection CRLF attacks
+    clean = clean.replace(/\r\n|\r/g, '\n');
+
+    return clean;
+}
+```
+
+---
+
+### 📡 2. CLI Environment Configuration Matrix
+
+| CLI Tool | Target Environment Variable | Value Format | Fallback Endpoint |
+| :--- | :--- | :--- | :--- |
+| **Claude Code** | `ANTHROPIC_BASE_URL` | `http://127.0.0.1:8080/v1` | `https://api.anthropic.com/v1` |
+| **Cursor / VSCode** | `OPENAI_BASE_URL` | `http://127.0.0.1:8080/v1` | `https://openrouter.ai/api/v1` |
+| **Aider / Codex** | `OPENAI_API_BASE` | `http://127.0.0.1:8080/v1` | Local Ollama `127.0.0.1:11434` |
+
 ## 🌐 Connected Ecosystem & Sister Projects
 
 Part of the **Адольф Петушков (Adolf Petushkov)** open-source engineering ecosystem:
