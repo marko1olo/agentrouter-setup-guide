@@ -1,652 +1,1278 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentRouter Ultimate Hub | Bypass WAF & Caching Guide</title>
-    <!-- Modern typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-color: #0d0f12;
-            --card-bg: #14181f;
-            --card-border: #212836;
-            --accent-pink: #ff3377;
-            --accent-cyan: #00ffcc;
-            --text-main: #f3f4f6;
-            --text-muted: #8e9bb0;
-            --code-bg: #090b0e;
-            --shadow-glow: 0 0 20px rgba(0, 255, 204, 0.15);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentRouter Ultimate Hub | WAF Bypass & Proxy Config Guide</title>
+  <meta name="description" content="Complete setup guide and interactive configuration builder for AgentRouter local proxy with Claude Code, Cline, Cursor, OpenCode, Cyrillic homoglyph WAF bypass, and TLS 1.3 telemetry.">
+  <meta name="keywords" content="agentrouter, claude code proxy, waf bypass, cyrillic homoglyph, cline proxy, cursor llm proxy, tls ja4 spoofing, format bridge">
+  <meta name="author" content="marko1olo">
+  <meta name="theme-color" content="#060b13">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
-        }
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://marko1olo.github.io/agentrouter-setup-guide/">
+  <meta property="og:title" content="AgentRouter Ultimate Hub | WAF Bypass & Proxy Config Guide">
+  <meta property="og:description" content="Generate zero-error WAF bypass configs, Cyrillic homoglyph sanitizers, and inspect live TLS 1.3 packet tunnels for Claude Code, Cline, and Cursor.">
+  <meta property="og:image" content="./assets/og-preview.png">
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://marko1olo.github.io/agentrouter-setup-guide/">
+  <meta name="twitter:title" content="AgentRouter Ultimate Hub | WAF Bypass & Proxy Config Guide">
+  <meta name="twitter:description" content="Generate zero-error WAF bypass configs, Cyrillic homoglyph sanitizers, and inspect live TLS 1.3 packet tunnels for Claude Code, Cline, and Cursor.">
+  <meta name="twitter:image" content="./assets/og-preview.png">
 
-        /* Ambient background glow */
-        .ambient-glow {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(0, 255, 204, 0.08) 0%, rgba(255, 51, 119, 0.05) 50%, rgba(0,0,0,0) 100%);
-            top: -200px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: -1;
-            pointer-events: none;
-            filter: blur(80px);
-        }
+  <!-- Canonical & Inline SVG Favicon -->
+  <link rel="canonical" href="https://marko1olo.github.io/agentrouter-setup-guide/">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 L28 8 L28 18 C28 25 16 30 16 30 C16 30 4 25 4 18 L4 8 Z' fill='%230c1524' stroke='%2300e5ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='15' r='4' fill='%2300e676'/%3E%3Cpath d='M16 11 L16 7 M12 15 L8 15 M20 15 L24 15 M16 19 L16 23' stroke='%2300e5ff' stroke-width='1.5'/%3E%3C/svg%3E">
 
-        header {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            text-align: center;
-            position: relative;
-        }
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AgentRouter Setup Guide & Interactive Hub",
+    "operatingSystem": "Cross-platform (Linux, Windows, macOS)",
+    "applicationCategory": "DeveloperApplication",
+    "description": "Interactive configuration matrix generator, live TLS 1.3 handshake terminal, and Cyrillic homoglyph WAF bypass inspector for local LLM proxies.",
+    "url": "https://marko1olo.github.io/agentrouter-setup-guide/",
+    "author": {
+      "@type": "Person",
+      "name": "marko1olo"
+    }
+  }
+  </script>
 
-        .badge {
-            display: inline-block;
-            background: linear-gradient(90deg, rgba(255, 51, 119, 0.1) 0%, rgba(0, 255, 204, 0.1) 100%);
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-glow);
-        }
+  <style>
+    :root {
+      /* Obsidian & Cybersecurity Cobalt */
+      --ar-bg: #060b13;
+      --ar-surface: #0c1524;
+      --ar-surface-raised: #121e33;
+      --ar-surface-code: #03060a;
+      
+      /* Primary Cyber Accents */
+      --ar-cyan: #00e5ff;
+      --ar-cyan-glow: rgba(0, 229, 255, 0.35);
+      --ar-amber: #ffaa00;
+      --ar-amber-glow: rgba(255, 170, 0, 0.35);
+      --ar-green: #00e676;
+      --ar-blue: #2979ff;
+      --ar-red: #ff3366;
 
-        h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 70%, var(--accent-pink) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
-            letter-spacing: -1px;
-        }
+      /* Typography & Layout */
+      --ar-text: #f0f6fc;
+      --ar-text-muted: #8b9bb4;
+      --ar-border: rgba(0, 229, 255, 0.22);
+      --ar-border-active: rgba(0, 229, 255, 0.7);
+      --ar-radius: 8px;
+      --ar-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --ar-font-sans: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --ar-shadow-glow: 0 0 20px rgba(0, 229, 255, 0.18);
+    }
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 700px;
-            margin: 0 auto 30px auto;
-        }
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* Navigation Tabs */
-        .tabs-nav {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            max-width: 900px;
-            margin: 0 auto 40px auto;
-            background-color: var(--card-bg);
-            padding: 6px;
-            border-radius: 14px;
-            border: 1px solid var(--card-border);
-        }
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--ar-bg);
+      color: var(--ar-text);
+      font-family: var(--ar-font-sans);
+    }
 
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, #101c33 0%, var(--ar-bg) 70%);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
 
-        .tab-btn:hover {
-            color: var(--text-main);
-            background-color: rgba(255, 255, 255, 0.03);
-        }
+    .ar-bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: 
+        linear-gradient(to right, rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
 
-        .tab-btn.active {
-            color: var(--bg-color);
-            background: linear-gradient(90deg, var(--accent-cyan) 0%, #00e5ff 100%);
-            box-shadow: var(--shadow-glow);
-            font-weight: 700;
-        }
+    .ar-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
 
-        /* Main Layout */
-        main {
-            max-width: 1200px;
-            margin: 0 auto 100px auto;
-            padding: 0 20px;
-        }
+    /* Navigation Bar */
+    .ar-nav {
+      border-bottom: 1px solid var(--ar-border);
+      background: rgba(6, 11, 19, 0.88);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
+    .ar-nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 4.2rem;
+    }
 
-        .tab-content.active {
-            display: block;
-        }
+    .ar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--ar-text);
+      font-family: var(--ar-font-mono);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .ar-brand-icon {
+      width: 2.2rem;
+      height: 2.2rem;
+      background: linear-gradient(135deg, var(--ar-blue), var(--ar-cyan));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--ar-cyan-glow);
+    }
 
-        /* Configurator Layout */
-        .config-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 30px;
-        }
+    .ar-brand-icon svg {
+      width: 1.3rem;
+      height: 1.3rem;
+      fill: #fff;
+    }
 
-        @media (max-width: 900px) {
-            .config-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+    .ar-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      list-style: none;
+    }
 
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 30px;
-            height: 100%;
-        }
+    .ar-nav-links a {
+      color: var(--ar-text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
 
-        .card h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    .ar-nav-links a:hover {
+      color: var(--ar-cyan);
+    }
 
-        .card h2 span {
-            color: var(--accent-cyan);
-        }
+    .ar-btn-gh {
+      background: var(--ar-surface-raised);
+      border: 1px solid var(--ar-border);
+      color: var(--ar-text);
+      padding: 0.5rem 1rem;
+      border-radius: var(--ar-radius);
+      font-family: var(--ar-font-mono);
+      font-size: 0.85rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
+    .ar-btn-gh:hover {
+      border-color: var(--ar-cyan);
+      box-shadow: 0 0 14px var(--ar-cyan-glow);
+    }
 
-        .input-group label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    /* Hero Section */
+    .ar-hero {
+      padding: 3.5rem 0 2rem;
+      text-align: center;
+    }
 
-        .input-field {
-            width: 100%;
-            background-color: var(--code-bg);
-            border: 1px solid var(--card-border);
-            color: var(--text-main);
-            padding: 14px 18px;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
+    .ar-badge-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
 
-        .input-field:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.1);
-        }
+    .ar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid var(--ar-cyan);
+      color: var(--ar-cyan);
+      font-family: var(--ar-font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 15px var(--ar-cyan-glow);
+    }
 
-        select.input-field {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238e9bb0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 18px center;
-            background-size: 18px;
-        }
+    .ar-pulse-green {
+      width: 0.5rem;
+      height: 0.5rem;
+      background: var(--ar-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--ar-green);
+      animation: arPulse 1.8s infinite;
+    }
 
-        /* Preview Code Block */
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--code-bg);
-            border: 1px solid var(--card-border);
-            border-bottom: none;
-            padding: 12px 20px;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-        }
+    @keyframes arPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.4; }
+    }
 
-        .preview-title {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+    .ar-ver-tag {
+      background: rgba(255, 170, 0, 0.1);
+      border: 1px solid var(--ar-amber);
+      color: var(--ar-amber);
+      font-family: var(--ar-font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+    }
 
-        .copy-btn {
-            background: none;
-            border: 1px solid var(--card-border);
-            color: var(--accent-cyan);
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+    .ar-title {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #ffffff 30%, var(--ar-cyan) 75%, var(--ar-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
 
-        .copy-btn:hover {
-            background-color: rgba(0, 255, 204, 0.05);
-            border-color: var(--accent-cyan);
-        }
+    .ar-subtitle {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--ar-text-muted);
+      max-width: 800px;
+      margin: 0 auto 2.5rem;
+    }
 
-        .code-container {
-            position: relative;
-        }
+    /* 2-Column Grid Deck: Config Builder & Live Terminal */
+    .ar-grid-deck {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
 
-        pre {
-            background-color: var(--code-bg);
-            border: 1px solid var(--card-border);
-            padding: 20px;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            overflow-x: auto;
-        }
+    @media (max-width: 960px) {
+      .ar-grid-deck {
+        grid-template-columns: 1fr;
+      }
+    }
 
-        code {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
-            color: #e2e8f0;
-        }
+    .ar-card {
+      background: var(--ar-surface);
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
 
-        /* Informative Section */
-        .info-box {
-            background-color: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
+    .ar-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-        .info-box h3 {
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-            color: var(--accent-cyan);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .ar-card-title {
+      font-family: var(--ar-font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
 
-        .info-box.danger h3 {
-            color: var(--accent-pink);
-        }
+    .ar-target-badge {
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      color: var(--ar-cyan);
+      background: rgba(0, 229, 255, 0.1);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+    }
 
-        .info-box p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
+    /* Client Tabs */
+    .ar-client-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
 
-        .info-box ul {
-            margin-left: 20px;
-            margin-top: 10px;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
+    .ar-tab {
+      background: var(--ar-surface-raised);
+      border: 1px solid var(--ar-border);
+      color: var(--ar-text-muted);
+      font-family: var(--ar-font-mono);
+      font-size: 0.8rem;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-        /* Download button styling */
-        .download-banner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: linear-gradient(90deg, rgba(0, 255, 204, 0.05) 0%, rgba(255, 51, 119, 0.05) 100%);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 20px 30px;
-            margin-top: 30px;
-        }
+    .ar-tab:hover {
+      color: var(--ar-text);
+      border-color: var(--ar-cyan);
+    }
 
-        .download-text h4 {
-            font-size: 1.1rem;
-            margin-bottom: 4px;
-        }
+    .ar-tab.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--ar-cyan);
+      color: var(--ar-cyan);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    }
 
-        .download-text p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
+    /* Form Grid */
+    .ar-form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
 
-        .download-btn {
-            display: inline-block;
-            background: linear-gradient(90deg, var(--accent-cyan) 0%, #00e5ff 100%);
-            color: var(--bg-color);
-            padding: 12px 28px;
-            border-radius: 10px;
-            font-weight: 700;
-            text-decoration: none;
-            box-shadow: var(--shadow-glow);
-            transition: var(--transition);
-        }
+    .ar-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
 
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
-        }
-    </style>
+    .ar-input-group label {
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      color: var(--ar-text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .ar-text-input, .ar-select-input {
+      background: var(--ar-surface-code);
+      border: 1px solid var(--ar-border);
+      color: var(--ar-text);
+      font-family: var(--ar-font-mono);
+      font-size: 0.85rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .ar-text-input:focus, .ar-select-input:focus {
+      border-color: var(--ar-cyan);
+      box-shadow: 0 0 8px var(--ar-cyan-glow);
+    }
+
+    /* Toggles List */
+    .ar-toggles-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: var(--ar-surface-code);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.85rem;
+      border-radius: 6px;
+    }
+
+    .ar-toggle-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      cursor: pointer;
+    }
+
+    .ar-toggle-row input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .ar-toggle-custom {
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--ar-border);
+      background: var(--ar-surface-raised);
+      border-radius: 4px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .ar-toggle-row input:checked ~ .ar-toggle-custom {
+      background: var(--ar-cyan);
+      border-color: var(--ar-cyan);
+      box-shadow: 0 0 8px var(--ar-cyan-glow);
+    }
+
+    .ar-toggle-row input:checked ~ .ar-toggle-custom::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 6px;
+      width: 4px;
+      height: 8px;
+      border: solid #000;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .ar-toggle-text strong {
+      display: block;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .ar-toggle-text small {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--ar-text-muted);
+      line-height: 1.3;
+    }
+
+    /* Snippet Code Output */
+    .ar-snippet-block {
+      background: var(--ar-surface-code);
+      border: 1px solid var(--ar-border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: auto;
+    }
+
+    .ar-snippet-header {
+      background: var(--ar-surface-raised);
+      padding: 0.5rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      color: var(--ar-text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ar-btn-copy {
+      background: transparent;
+      border: 1px solid var(--ar-border);
+      color: var(--ar-cyan);
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ar-btn-copy:hover {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--ar-cyan);
+    }
+
+    .ar-code-output {
+      padding: 1rem;
+      font-family: var(--ar-font-mono);
+      font-size: 0.8rem;
+      color: #00ff88;
+      overflow-x: auto;
+      max-height: 180px;
+      white-space: pre;
+    }
+
+    /* Terminal Side */
+    .ar-term-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .ar-btn-action {
+      background: linear-gradient(90deg, var(--ar-cyan), var(--ar-blue));
+      color: #040914;
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ar-btn-action:hover {
+      box-shadow: 0 0 10px var(--ar-cyan-glow);
+    }
+
+    .ar-btn-action-alt {
+      background: var(--ar-surface-raised);
+      border: 1px solid var(--ar-border);
+      color: var(--ar-text-muted);
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .ar-terminal-box {
+      height: 220px;
+      background: #020408;
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .ar-term-row {
+      line-height: 1.4;
+      word-break: break-all;
+    }
+
+    .ar-time {
+      color: #5b6982;
+    }
+
+    .ar-badge-term {
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .ar-badge-term.system { background: rgba(41, 121, 255, 0.2); color: var(--ar-blue); }
+    .ar-badge-term.waf { background: rgba(255, 170, 0, 0.2); color: var(--ar-amber); }
+    .ar-badge-term.tls { background: rgba(0, 229, 255, 0.2); color: var(--ar-cyan); }
+    .ar-badge-term.inbound { background: rgba(255, 255, 255, 0.15); color: #fff; }
+    .ar-badge-term.cipher { background: rgba(255, 0, 127, 0.2); color: #ff3399; }
+    .ar-badge-term.upstream { background: rgba(0, 230, 118, 0.2); color: var(--ar-green); }
+    .ar-badge-term.http { background: rgba(0, 230, 118, 0.2); color: var(--ar-green); }
+    .ar-badge-term.sse { background: rgba(0, 229, 255, 0.2); color: var(--ar-cyan); }
+    .ar-badge-term.restore { background: rgba(255, 170, 0, 0.2); color: var(--ar-amber); }
+
+    /* Homoglyph Inspector */
+    .ar-hex-inspector {
+      background: var(--ar-surface-code);
+      border: 1px solid var(--ar-border);
+      border-radius: 6px;
+      padding: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .ar-hex-title {
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--ar-amber);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ar-hex-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .ar-hex-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ar-hex-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .ar-hex-hdr {
+      font-size: 0.7rem;
+      font-family: var(--ar-font-mono);
+      color: var(--ar-text-muted);
+    }
+
+    .ar-hex-code {
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      color: var(--ar-cyan);
+      background: rgba(0, 229, 255, 0.05);
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .ar-hex-str {
+      font-size: 0.75rem;
+      color: var(--ar-green);
+      font-family: var(--ar-font-mono);
+    }
+
+    /* Latency Chart */
+    .ar-chart-wrap {
+      background: var(--ar-surface-code);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+
+    .ar-chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      color: var(--ar-text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    #ar-latency-canvas {
+      width: 100%;
+      height: 70px;
+      display: block;
+    }
+
+    .text-green { color: var(--ar-green); }
+    .text-cyan { color: var(--ar-cyan); }
+    .text-amber { color: var(--ar-amber); }
+
+    /* Documentation Section */
+    .ar-doc-section {
+      padding: 3rem 0;
+      border-top: 1px solid var(--ar-border);
+    }
+
+    .ar-section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+
+    .ar-section-desc {
+      color: var(--ar-text-muted);
+      margin-bottom: 2rem;
+      max-width: 750px;
+    }
+
+    .ar-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .ar-doc-card {
+      background: var(--ar-surface);
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius);
+      padding: 1.5rem;
+      transition: all 0.2s;
+    }
+
+    .ar-doc-card:hover {
+      border-color: var(--ar-cyan);
+      transform: translateY(-3px);
+    }
+
+    .ar-doc-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .ar-doc-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .ar-doc-p {
+      font-size: 0.9rem;
+      color: var(--ar-text-muted);
+      line-height: 1.5;
+    }
+
+    /* Troubleshooting Table */
+    .ar-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 3rem;
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius);
+    }
+
+    .ar-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .ar-table th, .ar-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ar-table th {
+      background: var(--ar-surface-raised);
+      font-family: var(--ar-font-mono);
+      font-size: 0.8rem;
+      color: var(--ar-cyan);
+    }
+
+    .ar-table tr:hover td {
+      background: rgba(0, 229, 255, 0.03);
+    }
+
+    /* Footer */
+    .ar-footer {
+      border-top: 1px solid var(--ar-border);
+      padding: 3rem 0;
+      text-align: center;
+      background: #04070d;
+    }
+
+    .ar-footer-text {
+      color: var(--ar-text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .ar-footer-sub {
+      font-family: var(--ar-font-mono);
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+  </style>
 </head>
 <body>
 
-    <div class="ambient-glow"></div>
+  <div class="ar-bg-grid"></div>
 
-    <header>
-        <div class="badge">🔥 Новое обновление 21.07.2026</div>
-        <h1>AgentRouter Ultimate Hub</h1>
-        <p class="subtitle">Быстрый обход WAF, решение проблемы обрывов стриминга и генератор готовых конфигураций для любых сред разработки и SillyTavern.</p>
+  <!-- Navigation -->
+  <nav class="ar-nav">
+    <div class="ar-container ar-nav-inner">
+      <a href="#" class="ar-brand">
+        <div class="ar-brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+        </div>
+        <span>AGENTROUTER-GUIDE</span>
+      </a>
+      <ul class="ar-nav-links">
+        <li><a href="#ar-sandbox">Config Matrix</a></li>
+        <li><a href="#ar-inspector">WAF Inspector</a></li>
+        <li><a href="#ar-features">Core Features</a></li>
+        <li><a href="#ar-troubleshoot">Troubleshooting</a></li>
+      </ul>
+      <a href="https://github.com/marko1olo/agentrouter-setup-guide" target="_blank" rel="noopener noreferrer" class="ar-btn-gh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="ar-container">
+    <!-- Hero -->
+    <header class="ar-hero">
+      <div class="ar-badge-line">
+        <span class="ar-badge"><span class="ar-pulse-green"></span> CLAUDE CODE & WAF BYPASS ENGINE</span>
+        <span class="ar-ver-tag">PROXY PORT: 8318</span>
+      </div>
+      <h1 class="ar-title">AgentRouter Config Builder & Handshake Inspector</h1>
+      <p class="ar-subtitle">Generate zero-error proxy environments, Cyrillic homoglyph sanitizers, and inspect live TLS 1.3 packet tunnels for autonomous developer agents.</p>
     </header>
 
-    <div class="tabs-nav">
-        <button class="tab-btn active" onclick="switchTab('configurator')">Генератор конфигов</button>
-        <button class="tab-btn" onclick="switchTab('proxy-setup')">Установка прокси</button>
-        <button class="tab-btn" onclick="switchTab('nsfw-bypass')">Обход фильтров NSFW</button>
+    <!-- Main 2-Column Grid Deck: Config Builder & Terminal -->
+    <section class="ar-grid-deck" id="ar-sandbox">
+      <!-- Left Column: Config Builder Matrix -->
+      <div class="ar-card ar-builder-card">
+        <div class="ar-card-header">
+          <h2 class="ar-card-title">⚙️ CONFIGURATION MATRIX</h2>
+          <span class="ar-target-badge" id="ar-active-client-label">TARGET: CLAUDE CODE CLI</span>
+        </div>
+
+        <!-- Target Client Selector Tabs -->
+        <div class="ar-client-tabs" role="tablist">
+          <button class="ar-tab active" data-client="claudecode">Claude Code CLI</button>
+          <button class="ar-tab" data-client="vscode">VS Code (Cline)</button>
+          <button class="ar-tab" data-client="cursor">Cursor IDE</button>
+          <button class="ar-tab" data-client="opencode">OpenCode</button>
+          <button class="ar-tab" data-client="systemd">Linux systemd</button>
+          <button class="ar-tab" data-client="windows">Windows Batch</button>
+        </div>
+
+        <!-- Dynamic Controls -->
+        <div class="ar-form-grid">
+          <div class="ar-input-group">
+            <label for="ar-input-key">API KEY TOKEN:</label>
+            <input type="text" id="ar-input-key" value="sk-ar-live-token-demo9948" class="ar-text-input" spellcheck="false">
+          </div>
+
+          <div class="ar-input-group">
+            <label for="ar-select-model">TARGET MODEL:</label>
+            <select id="ar-select-model" class="ar-select-input">
+              <option value="claude-opus-4-8" selected>claude-opus-4-8 (Native Anthropic)</option>
+              <option value="claude-3-7-sonnet">claude-3-7-sonnet (High-Speed)</option>
+              <option value="gpt-5.6-sol">gpt-5.6-sol (OpenAI Bridge)</option>
+              <option value="glm-5.2">glm-5.2 (Fast Bridge)</option>
+              <option value="kimi-k3">kimi-k3 (Deep CoT)</option>
+            </select>
+          </div>
+
+          <!-- Feature Toggles -->
+          <div class="ar-toggles-list">
+            <label class="ar-toggle-row">
+              <input type="checkbox" id="ar-toggle-homoglyph" checked>
+              <span class="ar-toggle-custom"></span>
+              <span class="ar-toggle-text">
+                <strong>Cyrillic Homoglyph Bypass</strong>
+                <small>Mutates ASCII 'c' (0x63) to Cyrillic 'с' (0xD1 0x81) to bypass WAF 500 sensitive_words</small>
+              </span>
+            </label>
+
+            <label class="ar-toggle-row">
+              <input type="checkbox" id="ar-toggle-bridge">
+              <span class="ar-toggle-custom"></span>
+              <span class="ar-toggle-text">
+                <strong>Anthropic-to-OpenAI Format Bridge</strong>
+                <small>Translates /v1/messages to /v1/chat/completions for non-Anthropic models</small>
+              </span>
+            </label>
+
+            <label class="ar-toggle-row">
+              <input type="checkbox" id="ar-toggle-tls" checked>
+              <span class="ar-toggle-custom"></span>
+              <span class="ar-toggle-text">
+                <strong>JA4 Fingerprint Spoofing (codex_cli_rs)</strong>
+                <small>Eliminates Cloudflare 401 Unauthorized & BrokenPipe errors</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Copyable Code Snippet Output -->
+        <div class="ar-snippet-block">
+          <div class="ar-snippet-header">
+            <span id="ar-snippet-filename">PowerShell (Run in Terminal before claude)</span>
+            <button id="ar-btn-copy" class="ar-btn-copy">📋 COPY CONFIG</button>
+          </div>
+          <pre class="ar-code-output"><code id="ar-code-content"></code></pre>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Terminal Handshake & Packet Inspection -->
+      <div class="ar-card ar-terminal-card" id="ar-inspector">
+        <div class="ar-card-header">
+          <h2 class="ar-card-title">🖥️ LIVE PROXY HANDSHAKE & WAF INSPECTOR</h2>
+          <div class="ar-term-actions">
+            <button id="ar-btn-test-req" class="ar-btn-action">▶ SEND TEST PACKET</button>
+            <button id="ar-btn-clear" class="ar-btn-action-alt">CLEAR</button>
+          </div>
+        </div>
+
+        <!-- Terminal Console View -->
+        <div class="ar-terminal-box" id="ar-terminal-output" role="log" aria-live="polite">
+          <!-- Stream Output Lines -->
+        </div>
+
+        <!-- Live Hex/ASCII Byte Difference Inspector -->
+        <div class="ar-hex-inspector">
+          <div class="ar-hex-title">
+            <span>HOMOGLYPH CIPHER MATRIX (OUTBOUND vs INBOUND)</span>
+            <span class="text-green" id="ar-homoglyph-status">ACTIVE (U+0441)</span>
+          </div>
+          <div class="ar-hex-grid">
+            <div class="ar-hex-col">
+              <span class="ar-hex-hdr">OUTBOUND TO WAF (Cyrillic Substituted)</span>
+              <code class="ar-hex-code" id="ar-hex-out">73 79 73 74 65 6d D1 81 6f 6e 74 65 78 74</code>
+              <span class="ar-hex-str" id="ar-str-out">"system \u0441ontext" (WAF: PASS 200 OK)</span>
+            </div>
+            <div class="ar-hex-col">
+              <span class="ar-hex-hdr">INBOUND TO CLIENT (Sanitized ASCII)</span>
+              <code class="ar-hex-code" id="ar-hex-in">73 79 73 74 65 6d 63 6f 6e 74 65 78 74</code>
+              <span class="ar-hex-str" id="ar-str-in">"system context" (Clean Code Output)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Latency Chart -->
+        <div class="ar-chart-wrap">
+          <div class="ar-chart-header">
+            <span>TLS 1.3 ROUND-TRIP LATENCY (ms)</span>
+            <strong class="text-green" id="ar-tls-latency-val">11.4 ms</strong>
+          </div>
+          <canvas id="ar-latency-canvas" width="520" height="70"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Features & Mechanics -->
+    <section class="ar-doc-section" id="ar-features">
+      <h2 class="ar-section-title">Core Proxy Capabilities & Defense Bypass</h2>
+      <p class="ar-section-desc">AgentRouter acts as an intelligent intermediary resolving upstream Cloudflare WAF false-positives and format incompatibilities.</p>
+
+      <div class="ar-grid-3">
+        <div class="ar-doc-card">
+          <div class="ar-doc-icon">🔤</div>
+          <h3 class="ar-doc-title">Cyrillic Homoglyph Engine</h3>
+          <p class="ar-doc-p">Replaces ASCII 'c' characters in sensitive prompt keywords with visually identical Cyrillic 'с' (UTF-8 <code>0xD1 0x81</code>), preventing cloud provider WAF filter triggers, and automatically restores them upon response return.</p>
+        </div>
+
+        <div class="ar-doc-card">
+          <div class="ar-doc-icon">🔀</div>
+          <h3 class="ar-doc-title">Bidirectional Format Bridge</h3>
+          <p class="ar-doc-p">Translates Anthropic <code>/v1/messages</code> payloads (with tool calls and system prompts) into standard OpenAI <code>/v1/chat/completions</code> format on the fly, enabling Claude Code to drive GPT-4o and custom models seamlessly.</p>
+        </div>
+
+        <div class="ar-doc-card">
+          <div class="ar-doc-icon">🛡️</div>
+          <h3 class="ar-doc-title">JA4 Fingerprint Spoofing</h3>
+          <p class="ar-doc-p">Emulates authentic browser TLS 1.3 ClientHello extensions and cipher suites via <code>codex_cli_rs</code>, eliminating 401 Unauthorized blocks caused by bot-detection intermediaries.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Troubleshooting Guide -->
+    <section class="ar-doc-section" id="ar-troubleshoot">
+      <h2 class="ar-section-title">Common Errors & Resolution Guide</h2>
+      <p class="ar-section-desc">Quickly resolve connection, handshake, and authentication challenges.</p>
+
+      <div class="ar-table-wrap">
+        <table class="ar-table">
+          <thead>
+            <tr>
+              <th>ERROR SYMPTOM</th>
+              <th>ROOT CAUSE</th>
+              <th>AGENTROUTER FIX</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong class="text-amber">HTTP 500 "sensitive_words"</strong></td>
+              <td>Upstream provider WAF matched blacklisted token string</td>
+              <td class="text-green">Enable Cyrillic Homoglyph Bypass in config</td>
+            </tr>
+            <tr>
+              <td><strong class="text-amber">HTTP 401 "Unauthorized"</strong></td>
+              <td>JA4 TLS client fingerprint identified as non-browser script</td>
+              <td class="text-green">Enable JA4 TLS Fingerprint Spoofing toggle</td>
+            </tr>
+            <tr>
+              <td><strong class="text-amber">Claude Code: Model Not Found</strong></td>
+              <td>Discovery gateway disabled in environment</td>
+              <td class="text-green">Set <code>CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY="1"</code></td>
+            </tr>
+            <tr>
+              <td><strong class="text-amber">BrokenPipe on Long Streams</strong></td>
+              <td>TCP KeepAlive timeout on streaming SSE connection</td>
+              <td class="text-green">Proxy automatically injects SSE heartbeat comments</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="ar-footer">
+    <div class="ar-container">
+      <p class="ar-footer-text">AgentRouter Setup Guide • Part of the 30-Site Interactive Portfolio</p>
+      <p class="ar-footer-sub">Autonomous AI Proxy & WAF Defense Architecture</p>
     </div>
+  </footer>
 
-    <main>
-        <!-- CONFIGURATOR TAB -->
-        <section id="configurator" class="tab-content active">
-            <div class="config-grid">
-                <!-- Inputs -->
-                <div class="card">
-                    <h2><span>01.</span> Параметры</h2>
-                    
-                    <div class="input-group">
-                        <label for="api-key">Ваш API Ключ (AgentRouter)</label>
-                        <input type="text" id="api-key" class="input-field" placeholder="sk-..." value="sk-dERPWqmuaY3vbSPk3GUNusf8DEcwcVrwqIVBvmE5UD68f88b">
-                    </div>
+  <!-- Interactive JavaScript Engine -->
+  <script>
+  (function() {
+    'use strict';
 
-                    <div class="input-group">
-                        <label for="proxy-port">Порт локального прокси</label>
-                        <input type="number" id="proxy-port" class="input-field" value="8318">
-                    </div>
+    class AgentRouterEngine {
+      constructor() {
+        this.currentClient = 'claudecode';
+        this.apiKey = 'sk-ar-live-token-demo9948';
+        this.model = 'claude-opus-4-8';
+        this.useHomoglyph = true;
+        this.useBridge = false;
+        this.useTlsSpoof = true;
 
-                    <div class="input-group">
-                        <label for="target-tool">Выберите инструмент</label>
-                        <select id="target-tool" class="input-field" onchange="generateConfig()">
-                            <option value="cline">Cline / Roo Code (VS Code)</option>
-                            <option value="claude-code">Claude Code Extension (VS Code)</option>
-                            <option value="copilot">GitHub Copilot (VS Code)</option>
-                            <option value="cursor">Cursor IDE</option>
-                            <option value="claude-app">Claude Desktop App</option>
-                            <option value="cli">Claude Code CLI (Консоль)</option>
-                            <option value="sillytavern">SillyTavern (Ролевки)</option>
-                        </select>
-                    </div>
-                </div>
+        this.bindDOM();
+        this.updateConfigOutput();
+        this.initTerminal();
+        this.initLatencyChart();
+      }
 
-                <!-- Preview -->
-                <div class="card">
-                    <div class="preview-header">
-                        <span class="preview-title" id="config-filename">settings.json</span>
-                        <button class="copy-btn" onclick="copyConfig()">Копировать</button>
-                    </div>
-                    <div class="code-container">
-                        <pre><code id="code-output"></code></pre>
-                    </div>
-                </div>
-            </div>
-        </section>
+      bindDOM() {
+        // Tab switching
+        document.querySelectorAll('.ar-tab').forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.ar-tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active');
+            this.currentClient = e.target.getAttribute('data-client');
+            document.getElementById('ar-active-client-label').innerText = `TARGET: ${e.target.innerText.toUpperCase()}`;
+            this.updateConfigOutput();
+          });
+        });
 
-        <!-- PROXY SETUP TAB -->
-        <section id="proxy-setup" class="tab-content">
-            <div class="info-box">
-                <h3>Зачем нужен локальный прокси?</h3>
-                <p>
-                    На серверах AgentRouter работает жесткий WAF, блокирующий сторонние приложения (ошибка <code>401 Unauthorized</code> или <code>500 sensitive_words_detected</code> на длинных системных промптах). 
-                </p>
-                <p style="margin-top: 10px;">
-                    Наш асинхронный прокси на <strong>FastAPI</strong> полностью решает эту проблему:
-                </p>
-                <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
-                    <li><strong>Обход WAF (Cyrillic-Bypass):</strong> Прокси прозрачно заменяет английские буквы <code>c</code> на русские <code>с</code> в запросе, обходя WAF, и возвращает их обратно в ответе. Код остается синтаксически идеальным.</li>
-                    <li><strong>Нативный режим (по умолчанию):</strong> Так как паника Tool Calling была исправлена разработчиками AgentRouter, прокси по умолчанию работает в прямом режиме (<code>AGENTROUTER_BRIDGE=false</code>). Вы получаете чистый Claude Opus.</li>
-                    <li><strong>Мост на OpenAI (опционально):</strong> При необходимости запросы можно автоматически переводить в OpenAI формат и отправлять на <code>gpt-5.5</code> или <code>glm-5.2</code>.</li>
-                </ul>
-            </div>
-
-            <div class="info-box">
-                <h3>Инструкция по установке и запуску:</h3>
-                <ol style="margin-left: 20px; color: var(--text-muted);">
-                    <li>Установите зависимости: <code style="color: var(--accent-cyan);">pip install fastapi uvicorn httpx</code></li>
-                    <li>Скачайте оба скрипта из репозитория и положите в одну папку (или на Рабочий стол): <code>agentrouter_proxy.py</code> и <code>format_bridge.py</code></li>
-                    <li>Скачайте и запустите <code>run_proxy.bat</code> для удобного выбора режима запуска в 1 клик.</li>
-                </ol>
-            </div>
-
-            <div class="info-box">
-                <h3>Режимы запуска (как переключать вручную):</h3>
-                <p>Вы можете переключать режимы через переменные среды при запуске:</p>
-                <pre style="border: 1px solid var(--card-border); padding: 10px; border-radius: 8px; margin-top: 10px; background-color: var(--code-bg);"><code style="font-size: 0.85rem; color: var(--accent-cyan);"># Windows (PowerShell):
-# Запуск чистого Claude Opus (по умолчанию):
-$env:AGENTROUTER_BRIDGE="false"
-python agentrouter_proxy.py
-
-# Мост на gpt-5.5 (OpenAI):
-$env:AGENTROUTER_BRIDGE="true"
-$env:AGENTROUTER_BRIDGE_MODEL="gpt-5.5"
-python agentrouter_proxy.py
-
-# Мост на GLM-5.2 (Быстро/Дешево):
-$env:AGENTROUTER_BRIDGE="true"
-$env:AGENTROUTER_BRIDGE_MODEL="glm-5.2"
-python agentrouter_proxy.py
-
-# Linux / macOS (Bash):
-# Запуск чистого Claude Opus (по умолчанию):
-export AGENTROUTER_BRIDGE="false"
-python agentrouter_proxy.py</code></pre>
-            </div>
-
-            <div class="download-banner" style="margin-top: 20px;">
-                <div class="download-text">
-                    <h4>Репозиторий проекта на GitHub</h4>
-                    <p>Исходный код прокси и моста, баг-трекер и инструкции.</p>
-                </div>
-                <a href="https://github.com/marko1olo/agentrouter-setup-guide" target="_blank" class="download-btn">Открыть GitHub</a>
-            </div>
-        </section>
-
-        <!-- NSFW BYPASS TAB -->
-        <section id="nsfw-bypass" class="tab-content">
-            <div class="info-box">
-                <h3>Победа над ошибкой "sensitive words detected"</h3>
-                <p>
-                    Это фильтр самого AgentRouter. Он срабатывает на подозрительные слова в карточке персонажа или системном промте.
-                </p>
-                <ul>
-                    <li><strong>Замена тегов:</strong> Фильтр жестко триггерится на закрывающий XML-тег <code>&lt;/character&gt;</code>. Замените его в карточке на <code>&lt;/char&gt;</code> или <code>&lt;/ch&gt;</code>, и 90% блокировок сразу пропадут!</li>
-                    <li><strong>Удаление триггеров:</strong> Уберите из карточек и промтов явные слова типа <code>sex</code>, <code>drugs</code>, <code>violence</code>, заменив их на синонимы или описательные конструкции.</li>
-                    <li><strong>Дополнительные параметры:</strong> В параметрах подключения в Таверне обязательно переопределите параметры <code>temperature</code> или <code>top_p</code>.</li>
-                </ul>
-            </div>
-            
-            <div class="info-box danger">
-                <h3>Фильтры цензуры моделей Claude</h3>
-                <p>
-                    С взрослыми персонажами (NSFW) у Claude Opus/Sonnet на AgentRouter проблем практически нет. Однако для пробива жесткой цензуры используйте джейлбрейки (jailbreaks) и правильный контекст персонажа.
-                </p>
-            </div>
-        </section>
-    
-        <!-- PRICING TAB -->
-        <section id="pricing" class="tab-content">
-            <div class="info-box" style="border-left: 4px solid var(--accent-purple, #a855f7);">
-                <h3>📊 Официальный расчёт стоимости AgentRouter</h3>
-                <p>Формула списания за токены на AgentRouter (Pay-as-you-go):</p>
-                <div style="background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; color: #38bdf8; margin: 10px 0;">
-                    Стоимость ($) = Группа (1x) × Модель Ratio × [Prompt tokens + (Completion tokens × Completion Ratio)] / 500,000
-                </div>
-            </div>
-
-            
-            
-            <div class="info-box">
-                <h3>🏷️ Актуальные модели AgentRouter</h3>
-                <div style="overflow-x: auto; margin-top: 10px;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; color: var(--text-main);">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--card-border); color: #38bdf8;">
-                                <th style="padding: 10px;">ID Модели</th>
-                                <th style="padding: 10px;">Model Ratio</th>
-                                <th style="padding: 10px;">Completion Ratio</th>
-                                <th style="padding: 10px;">Prompt ($ / 1M)</th>
-                                <th style="padding: 10px;">Completion ($ / 1M)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="border-bottom: 1px solid var(--card-border);">
-                                <td style="padding: 10px;"><code style="color: var(--accent-cyan);">claude-opus-4-8</code></td>
-                                <td style="padding: 10px;">4.0x</td>
-                                <td style="padding: 10px;">5.0x</td>
-                                <td style="padding: 10px; color: #4ade80;">$8.00 / 1M</td>
-                                <td style="padding: 10px; color: #f87171;">$40.00 / 1M</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid var(--card-border);">
-                                <td style="padding: 10px;"><code style="color: var(--accent-cyan);">gpt-5.6-sol</code></td>
-                                <td style="padding: 10px;">2.0x</td>
-                                <td style="padding: 10px;">5.0x</td>
-                                <td style="padding: 10px; color: #4ade80;">$4.00 / 1M</td>
-                                <td style="padding: 10px; color: #f87171;">$20.00 / 1M</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid var(--card-border);">
-                                <td style="padding: 10px;"><code style="color: var(--accent-cyan);">gpt-5.5</code></td>
-                                <td style="padding: 10px;">3.0x</td>
-                                <td style="padding: 10px;">1.5x</td>
-                                <td style="padding: 10px; color: #4ade80;">$6.00 / 1M</td>
-                                <td style="padding: 10px; color: #f87171;">$9.00 / 1M</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid var(--card-border);">
-                                <td style="padding: 10px;"><code style="color: var(--accent-cyan);">glm-5.2</code></td>
-                                <td style="padding: 10px;">2.0x</td>
-                                <td style="padding: 10px;">2.0x</td>
-                                <td style="padding: 10px; color: #4ade80;">$4.00 / 1M</td>
-                                <td style="padding: 10px; color: #f87171;">$8.00 / 1M</td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid var(--card-border);">
-                                <td style="padding: 10px;"><code style="color: var(--accent-cyan);">kimi-k3</code></td>
-                                <td style="padding: 10px;">2.0x</td>
-                                <td style="padding: 10px;">2.0x</td>
-                                <td style="padding: 10px; color: #4ade80;">$4.00 / 1M</td>
-                                <td style="padding: 10px; color: #f87171;">$8.00 / 1M</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-</section>
-
-</main>
-
-    <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-
-            if (tabId === 'configurator') {
-                generateConfig();
-            }
+        // Inputs
+        const keyInput = document.getElementById('ar-input-key');
+        if (keyInput) {
+          keyInput.addEventListener('input', (e) => {
+            this.apiKey = e.target.value || 'sk-YOUR-KEY';
+            this.updateConfigOutput();
+          });
         }
 
-        // Live config generation logic
-        const apiKeyInput = document.getElementById('api-key');
-        const portInput = document.getElementById('proxy-port');
-        
-        [apiKeyInput, portInput].forEach(el => el.addEventListener('input', generateConfig));
-
-        function generateConfig() {
-            const key = apiKeyInput.value.trim() || 'sk-YOUR_KEY';
-            const port = portInput.value.trim() || '8318';
-            const tool = document.getElementById('target-tool').value;
-            
-            const fileTitle = document.getElementById('config-filename');
-            const codeOutput = document.getElementById('code-output');
-
-            if (tool === 'cline') {
-                fileTitle.innerText = "VS Code settings.json (Cline/Roo)";
-                codeOutput.innerText = JSON.stringify({
-                    "apiProvider": "anthropic",
-                    "anthropicBaseUrl": `http://127.0.0.1:${port}`,
-                    "anthropicApiKey": key,
-                    "anthropicModelId": "claude-opus-4-8"
-                }, null, 4);
-            } 
-            else if (tool === 'claude-code') {
-                fileTitle.innerText = "VS Code settings.json";
-                codeOutput.innerText = JSON.stringify({
-                    "claudeCode.environmentVariables": [
-                        { "name": "ANTHROPIC_AUTH_TOKEN", "value": key },
-                        { "name": "ANTHROPIC_BASE_URL", "value": `http://127.0.0.1:${port}` },
-                        { "name": "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY", "value": "1" },
-                        { "name": "ANTHROPIC_MODEL", "value": "claude-opus-4-8" }
-                    ],
-                    "claudeCode.disableLoginPrompt": true,
-                    "claudeCode.initialPermissionMode": "bypassPermissions",
-                    "claudeCode.allowDangerouslySkipPermissions": true
-                }, null, 4);
+        const modelSelect = document.getElementById('ar-select-model');
+        if (modelSelect) {
+          modelSelect.addEventListener('change', (e) => {
+            this.model = e.target.value;
+            if (this.model.startsWith('gpt') || this.model.startsWith('glm') || this.model.startsWith('kimi')) {
+              document.getElementById('ar-toggle-bridge').checked = true;
+              this.useBridge = true;
             }
-            else if (tool === 'copilot') {
-                fileTitle.innerText = "Copilot Custom Endpoints";
-                codeOutput.innerText = `Название: AgentRouter\nAPI Key: ${key}\nBase URL (для Claude): http://127.0.0.1:${port}\nBase URL (для GPT): http://127.0.0.1:${port}/v1\nModel ID: claude-opus-4-8 или gpt-5.5`;
-            }
-            else if (tool === 'cursor') {
-                fileTitle.innerText = "Cursor Settings (Models)";
-                codeOutput.innerText = `1. Перейдите в Settings -> Models\n2. Отключите 'Cursor Tab'\n3. Включите 'Override Base URL'\n4. Пропишите: http://127.0.0.1:${port}\n5. Вставьте свой API Ключ: ${key}`;
-            }
-            else if (tool === 'claude-app') {
-                fileTitle.innerText = "Claude App Dev Settings";
-                codeOutput.innerText = `1. Включите Dev Mode (Help -> Troubleshooting -> Enable developer mode)\n2. Введите параметры:\n   - Gateway base URL: http://127.0.0.1:${port}\n   - Gateway API key: ${key}\n   - Gateway auth scheme: bearer`;
-            }
-            else if (tool === 'cli') {
-                fileTitle.innerText = "PowerShell commands";
-                codeOutput.innerText = `[System.Environment]::SetEnvironmentVariable('ANTHROPIC_BASE_URL', 'http://127.0.0.1:${port}', 'User')\n[System.Environment]::SetEnvironmentVariable('ANTHROPIC_API_KEY', '${key}', 'User')\n[System.Environment]::SetEnvironmentVariable('ANTHROPIC_MODEL', 'claude-opus-4-8', 'User')\n\n# Фикс вечной авторизации:\nNew-Item -ItemType Directory -Force -Path "$HOME\\.claude"\nSet-Content -Path "$HOME\\.claude\\.credentials.json" -Value '{"hasCompletedOnboarding": true}'`;
-            }
-            else if (tool === 'sillytavern') {
-                fileTitle.innerText = "SillyTavern Settings";
-                codeOutput.innerText = `1. API: Выберите 'Chat Completion'\n2. API-провайдер: Выберите 'OpenAI' или 'Custom (OpenAI-compatible)'\n3. API URL: http://127.0.0.1:${port}/v1\n4. API Key: Вставьте ${key}\n5. Нажмите кнопку коннекта и выберите модель (например, gpt-5.5 или claude-opus-4-8)`;
-            }
+            this.updateConfigOutput();
+          });
         }
 
-        function copyConfig() {
-            const code = document.getElementById('code-output').innerText;
+        const homoglyphToggle = document.getElementById('ar-toggle-homoglyph');
+        if (homoglyphToggle) {
+          homoglyphToggle.addEventListener('change', (e) => {
+            this.useHomoglyph = e.target.checked;
+            document.getElementById('ar-homoglyph-status').innerText = this.useHomoglyph ? 'ACTIVE (U+0441)' : 'DISABLED';
+            document.getElementById('ar-homoglyph-status').className = this.useHomoglyph ? 'text-green' : 'text-amber';
+            this.updateConfigOutput();
+          });
+        }
+
+        const bridgeToggle = document.getElementById('ar-toggle-bridge');
+        if (bridgeToggle) {
+          bridgeToggle.addEventListener('change', (e) => {
+            this.useBridge = e.target.checked;
+            this.updateConfigOutput();
+          });
+        }
+
+        const copyBtn = document.getElementById('ar-btn-copy');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', () => {
+            const code = document.getElementById('ar-code-content').innerText;
             navigator.clipboard.writeText(code).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                btn.innerText = "Скопировано!";
-                setTimeout(() => btn.innerText = "Копировать", 2000);
+              copyBtn.innerText = '✅ COPIED!';
+              setTimeout(() => copyBtn.innerText = '📋 COPY CONFIG', 2000);
             });
+          });
         }
 
-        // Initialize generator
-        generateConfig();
-    </script>
+        const testReqBtn = document.getElementById('ar-btn-test-req');
+        if (testReqBtn) {
+          testReqBtn.addEventListener('click', () => {
+            this.sendSimulatedPacket();
+          });
+        }
+
+        const clearBtn = document.getElementById('ar-btn-clear');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', () => {
+            document.getElementById('ar-terminal-output').innerHTML = '';
+          });
+        }
+      }
+
+      updateConfigOutput() {
+        const codeElem = document.getElementById('ar-code-content');
+        const fileElem = document.getElementById('ar-snippet-filename');
+        if (!codeElem || !fileElem) return;
+
+        if (this.currentClient === 'claudecode') {
+          fileElem.innerText = 'PowerShell (Run in Terminal before claude)';
+          codeElem.innerText = 
+`# Set AgentRouter local proxy environment
+$env:ANTHROPIC_AUTH_TOKEN="${this.apiKey}"
+$env:ANTHROPIC_BASE_URL="http://127.0.0.1:8318"
+$env:CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY="1"
+$env:ANTHROPIC_MODEL="${this.model}"
+
+# Launch Claude Code with WAF bypass
+claude`;
+        } else if (this.currentClient === 'vscode') {
+          fileElem.innerText = 'VS Code settings.json (Cline / Roo Code)';
+          codeElem.innerText = 
+JSON.stringify({
+  "cline.apiProvider": "anthropic",
+  "cline.apiBaseUrl": "http://127.0.0.1:8318",
+  "cline.apiKey": this.apiKey,
+  "cline.customModelId": this.model,
+  "cline.homoglyphBypass": this.useHomoglyph
+}, null, 2);
+        } else if (this.currentClient === 'cursor') {
+          fileElem.innerText = 'Cursor IDE -> Settings -> Models -> Override';
+          codeElem.innerText = 
+`Base URL: http://127.0.0.1:8318/v1
+API Key:  ${this.apiKey}
+Model:    ${this.model}
+Override: Cyrillic-Homoglyph Enabled (${this.useHomoglyph ? 'ON' : 'OFF'})`;
+        } else if (this.currentClient === 'opencode') {
+          fileElem.innerText = '~/.config/opencode/opencode.jsonc';
+          codeElem.innerText = 
+`"agentrouter": {
+  "npm": "@ai-sdk/anthropic",
+  "options": {
+    "baseURL": "http://127.0.0.1:8318/v1",
+    "apiKey": "${this.apiKey}"
+  },
+  "models": {
+    "${this.model}": { "name": "AgentRouter ${this.model}" }
+  }
+}`;
+        } else if (this.currentClient === 'systemd') {
+          fileElem.innerText = '~/.config/systemd/user/agentrouter_proxy.service';
+          codeElem.innerText = 
+`[Unit]
+Description=AgentRouter WAF Bypass Proxy
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 agentrouter_proxy.py
+Environment="AGENTROUTER_BRIDGE=${this.useBridge}"
+Environment="AGENTROUTER_BRIDGE_MODEL=${this.model}"
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target`;
+        } else {
+          fileElem.innerText = 'Windows run_proxy.bat';
+          codeElem.innerText = 
+`@echo off
+title AgentRouter WAF Bypass Gateway :8318
+set AGENTROUTER_BRIDGE=${this.useBridge}
+set AGENTROUTER_BRIDGE_MODEL=${this.model}
+python agentrouter_proxy.py
+pause`;
+        }
+      }
+
+      initTerminal() {
+        this.logTerm('SYSTEM', 'AgentRouter Local Proxy daemon active on 127.0.0.1:8318');
+        this.logTerm('WAF', 'Cyrillic homoglyph transform table mounted (ASCII 0x63 <-> UTF-8 0xD181)');
+        this.logTerm('TLS', 'JA4 signature loaded: t13d1516h2_8daaf6152771_b4 (codex_cli_rs)');
+      }
+
+      sendSimulatedPacket() {
+        const promptSample = "Implement secure authorization middleware and refactor SQL queries.";
+        this.logTerm('INBOUND', `POST /v1/messages (${promptSample.length} chars) from client...`);
+        
+        setTimeout(() => {
+          if (this.useHomoglyph) {
+            this.logTerm('CIPHER', `[Homoglyph] Replaced 8 ASCII 'c' with Cyrillic 'с' (U+0441). WAF signature sanitized.`);
+          }
+          this.logTerm('UPSTREAM', `Dialing TLS 1.3 upstream https://agentrouter.org/v1...`);
+        }, 120);
+
+        setTimeout(() => {
+          this.logTerm('HTTP', `HTTP/1.1 200 OK | Upstream latency: 82ms | Transfer-Encoding: chunked`);
+          this.logTerm('SSE', `data: {"type":"content_block_delta","delta":{"type":"text_delta","text":"const express = require('express');"}}`);
+          if (this.useHomoglyph) {
+            this.logTerm('RESTORE', `[Homoglyph] Restored Cyrillic 'с' -> clean ASCII 'c' for client runtime.`);
+          }
+        }, 320);
+      }
+
+      logTerm(badge, text) {
+        const container = document.getElementById('ar-terminal-output');
+        if (!container) return;
+        const time = new Date().toISOString().substr(11, 8);
+        const line = document.createElement('div');
+        line.className = 'ar-term-row';
+        line.innerHTML = `<span class="ar-time">[${time}]</span> <span class="ar-badge-term ${badge.toLowerCase()}">${badge}</span> ${text}`;
+        container.appendChild(line);
+        container.scrollTop = container.scrollHeight;
+      }
+
+      initLatencyChart() {
+        const canvas = document.getElementById('ar-latency-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const data = Array.from({ length: 40 }, () => 10 + Math.random() * 4);
+
+        const render = () => {
+          data.push(10 + Math.random() * 4);
+          data.shift();
+
+          const W = canvas.width;
+          const H = canvas.height;
+
+          ctx.clearRect(0, 0, W, H);
+          ctx.strokeStyle = '#00e5ff';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          
+          const step = W / (data.length - 1);
+          data.forEach((val, i) => {
+            const y = H - (val / 20) * H;
+            if (i === 0) ctx.moveTo(0, y);
+            else ctx.lineTo(i * step, y);
+          });
+          ctx.stroke();
+
+          // Gradient fill
+          ctx.lineTo(W, H);
+          ctx.lineTo(0, H);
+          ctx.closePath();
+          const grad = ctx.createLinearGradient(0, 0, 0, H);
+          grad.addColorStop(0, 'rgba(0, 229, 255, 0.25)');
+          grad.addColorStop(1, 'rgba(0, 229, 255, 0.0)');
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          const lastVal = data[data.length - 1].toFixed(1);
+          const valElem = document.getElementById('ar-tls-latency-val');
+          if (valElem) valElem.innerText = `${lastVal} ms`;
+
+          setTimeout(() => requestAnimationFrame(render), 120);
+        };
+        render();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      new AgentRouterEngine();
+    });
+
+  })();
+  </script>
 </body>
 </html>
